@@ -6,9 +6,9 @@ import useOrientation from "@/hooks/useOrientation";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useCurrentMusic } from "@/core/trackPlayer";
 import globalStyle from "@/constants/globalStyle";
-import { View } from "react-native";
 import Operations from "./operations";
 import { showPanel } from "@/components/panels/usePanel.ts";
+import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 
 interface IProps {
     onTurnPageClick?: () => void;
@@ -25,11 +25,13 @@ export default function AlbumCover(props: IProps) {
             return {
                 width: rpx(500),
                 height: rpx(500),
+                borderRadius: rpx(38),
             };
         } else {
             return {
                 width: rpx(260),
                 height: rpx(260),
+                borderRadius: rpx(26),
             };
         }
     }, [orientation]);
@@ -55,15 +57,33 @@ export default function AlbumCover(props: IProps) {
     return (
         <>
             <GestureDetector gesture={combineGesture}>
-                <View style={globalStyle.fullCenter}>
-                    <FastImage
-                        style={artworkStyle}
-                        source={musicItem?.artwork}
-                        placeholderSource={ImgAsset.albumDefault}
-                    />
-                </View>
+                <Animated.View
+                    entering={ZoomIn.duration(480).springify()}
+                    style={[globalStyle.fullCenter, styles.coverStage]}>
+                    <Animated.View entering={FadeIn.duration(620)} style={styles.shadow}>
+                        <FastImage
+                            style={artworkStyle}
+                            source={musicItem?.artwork}
+                            placeholderSource={ImgAsset.albumDefault}
+                        />
+                    </Animated.View>
+                </Animated.View>
             </GestureDetector>
             <Operations />
         </>
     );
 }
+
+const styles = {
+    coverStage: {
+        paddingHorizontal: rpx(28),
+    },
+    shadow: {
+        borderRadius: rpx(38),
+        shadowColor: "#000",
+        shadowOpacity: 0.38,
+        shadowRadius: rpx(34),
+        shadowOffset: { width: 0, height: rpx(22) },
+        elevation: 18,
+    },
+};

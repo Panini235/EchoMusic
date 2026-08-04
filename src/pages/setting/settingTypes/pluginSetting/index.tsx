@@ -29,7 +29,7 @@ export default function PluginSetting() {
             screenOptions={{
                 headerShown: false,
                 animation: "slide_from_right",
-                animationDuration: 100,
+                animationDuration: 240,
             }}>
             {routes.map(route => (
                 <Stack.Screen

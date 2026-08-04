@@ -1,5 +1,5 @@
-import React, { memo, useLayoutEffect, useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { memo, useLayoutEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import rpx from "@/utils/rpx";
 import FastImage from "../base/fastImage";
 import { ImgAsset } from "@/constants/assetsConst";
@@ -44,7 +44,7 @@ function _BarMusicItem(props: IBarMusicItemProps) {
             style={[
                 styles.container,
                 {
-                    paddingLeft: rpx(24) + safeAreaInsets.left,
+                    paddingLeft: rpx(14) + safeAreaInsets.left,
                 },
                 animatedStyles,
             ]}>
@@ -53,25 +53,25 @@ function _BarMusicItem(props: IBarMusicItemProps) {
                 source={musicItem.artwork}
                 placeholderSource={ImgAsset.albumDefault}
             />
-            <Text
-                ellipsizeMode="tail"
-                accessible={false}
-                style={styles.textWrapper}
-                numberOfLines={1}>
-                <ThemeText fontSize="content" fontColor="musicBarText">
+            <View accessible={false} style={styles.textWrapper}>
+                <ThemeText
+                    fontSize="content"
+                    fontWeight="semibold"
+                    fontColor="musicBarText"
+                    numberOfLines={1}>
                     {musicItem?.title}
                 </ThemeText>
                 {musicItem?.artist && (
                     <ThemeText
                         fontSize="description"
+                        numberOfLines={1}
                         color={Color(colors.musicBarText)
                             .alpha(0.6)
                             .toString()}>
-                        {" "}
-                        -{musicItem.artist}
+                        {musicItem.artist}
                     </ThemeText>
                 )}
-            </Text>
+            </View>
         </Animated.View>
     );
 }
@@ -91,14 +91,16 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     textWrapper: {
+        justifyContent: "center",
         flexGrow: 1,
         flexShrink: 1,
+        gap: rpx(3),
     },
     artworkImg: {
-        width: rpx(96),
-        height: rpx(96),
-        borderRadius: rpx(48),
-        marginRight: rpx(24),
+        width: rpx(88),
+        height: rpx(88),
+        borderRadius: rpx(22),
+        marginRight: rpx(18),
     },
 });
 
@@ -118,19 +120,16 @@ function skipMusicItem(direction: number) {
 export default function MusicInfo(props: IMusicInfoProps) {
     const { musicItem } = props;
     const navigate = useNavigate();
-    const playLists = usePlayList();
-    const siblingMusicItems = useMemo(() => {
-        if (!musicItem) {
-            return {
-                prev: null,
-                next: null,
-            };
-        }
-        return {
+    usePlayList();
+    const siblingMusicItems = musicItem
+        ? {
             prev: TrackPlayer.previousMusic,
             next: TrackPlayer.nextMusic,
+        }
+        : {
+            prev: null,
+            next: null,
         };
-    }, [musicItem, playLists]);
 
     // +- 1
     const transformSharedValue = useSharedValue(0);
@@ -145,7 +144,7 @@ export default function MusicInfo(props: IMusicInfoProps) {
 
     useLayoutEffect(() => {
         transformSharedValue.value = 0;
-    }, [musicItem]);
+    }, [musicItem, transformSharedValue]);
 
     const panGesture = Gesture.Pan()
         .minPointers(1)

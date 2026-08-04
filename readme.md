@@ -1,4 +1,23 @@
-# MusicFree
+# EchoMusic · 畅听
+
+一个美观、低负担、无广告的插件化 Android 音乐播放器。界面以 Apple Music
+的信息层级和 Claude 的温暖克制为参考，完整保留 MusicFree 插件兼容能力。
+
+[![Android CI](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml/badge.svg)](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml)
+
+> 本项目基于 [maotoumao/MusicFree](https://github.com/maotoumao/MusicFree)
+> 按 AGPL-3.0 继续开源。应用不内置任何平台音源；Bilibili、抖音、网易云、
+> QQ 音乐、喜马拉雅等服务需要用户自行安装合法来源的 MusicFree 插件。
+
+## EchoMusic 构建
+
+推送到 `main`、`agent/**` 分支或提交 Pull Request 后，GitHub Actions 会自动
+完成 TypeScript 检查、测试和 Android Debug APK 构建。构建成功后可在对应的
+Actions 运行页面下载 `EchoMusic-debug-*` 产物。本地不要求安装 Android SDK。
+
+---
+
+## 上游项目说明
 
 **中文** | [English](./readme-en.md)
 

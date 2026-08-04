@@ -12,10 +12,11 @@ import { StyleSheet, View } from "react-native";
 import ThemeText from "@/components/base/themeText";
 import IconTextButton from "@/components/base/iconTextButton";
 import ThemeSwitch from "@/components/base/switch";
-import { IIconName } from "@/components/base/icon.tsx";
+import Icon, { IIconName } from "@/components/base/icon.tsx";
 import { useI18N } from "@/core/i18n";
 import IconButton from "@/components/base/iconButton";
 import useRerender from "@/hooks/useRerender";
+import Color from "color";
 
 interface IPluginItemProps {
     plugin: Plugin;
@@ -205,9 +206,18 @@ function _PluginItem(props: IPluginItemProps) {
                 styles.container,
                 {
                     backgroundColor: colors.card,
+                    borderColor: Color(colors.text).alpha(0.06).toString(),
+                    shadowColor: colors.shadow,
                 },
             ]}>
             <View style={styles.header}>
+                <View
+                    style={[
+                        styles.pluginIcon,
+                        { backgroundColor: Color(colors.primary).alpha(0.13).toString() },
+                    ]}>
+                    <Icon name="javascript" size={rpx(36)} color={colors.primary} />
+                </View>
                 <View style={styles.headerPluginContainer}>
                     <ThemeText
                         numberOfLines={1}
@@ -319,15 +329,28 @@ export default PluginItem;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        borderRadius: rpx(8),
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
         marginHorizontal: rpx(24),
-        paddingVertical: rpx(18),
-        marginTop: rpx(36),
+        paddingVertical: rpx(22),
+        marginTop: rpx(18),
+        shadowOpacity: 0.08,
+        shadowRadius: rpx(14),
+        shadowOffset: { width: 0, height: rpx(6) },
+        elevation: 3,
     },
     header: {
-        paddingHorizontal: rpx(16),
+        paddingHorizontal: rpx(20),
         flexDirection: "row",
         alignItems: "center",
+    },
+    pluginIcon: {
+        width: rpx(68),
+        height: rpx(68),
+        marginRight: rpx(18),
+        borderRadius: rpx(22),
+        alignItems: "center",
+        justifyContent: "center",
     },
     headerPluginContainer: {
         flexShrink: 1,
@@ -342,18 +365,19 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     description: {
-        marginHorizontal: rpx(16),
-        marginVertical: rpx(24),
+        marginHorizontal: rpx(20),
+        marginTop: rpx(20),
+        marginBottom: rpx(22),
         flexDirection: "row",
     },
     alternativePluginDescription: {
-        marginHorizontal: rpx(16),
+        marginHorizontal: rpx(20),
         marginBottom: rpx(24),
         flexDirection: "row",
     },
     contents: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
         flexWrap: "wrap",
         gap: rpx(16),
     },

@@ -2,9 +2,11 @@ import ThemeText from "@/components/base/themeText";
 import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
 import React from "react";
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Icon, { IIconName } from "@/components/base/icon.tsx";
+import Color from "color";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 interface IActionButtonProps {
     iconName: IIconName;
@@ -12,53 +14,70 @@ interface IActionButtonProps {
     title: string;
     action?: () => void;
     style?: StyleProp<ViewStyle>;
+    delay?: number;
 }
 
 export default function ActionButton(props: IActionButtonProps) {
-    const { iconName, iconColor, title, action, style } = props;
+    const { iconName, iconColor, title, action, style, delay = 0 } = props;
     const colors = useColors();
-    // rippleColor="rgba(0, 0, 0, .32)"
+    const accent = iconColor ?? colors.primary;
+
     return (
-        <TouchableOpacity
-            onPress={action}
-            style={[
-                styles.wrapper,
-                {
-                    backgroundColor: colors.card,
-                },
-                style,
-            ]}>
-            <>
-                <Icon
-                    accessible={false}
-                    name={iconName}
-                    color={iconColor ?? colors.text}
-                    size={rpx(48)}
-                />
+        <Animated.View entering={FadeInDown.delay(delay).duration(320)} style={style}>
+            <TouchableOpacity
+                activeOpacity={0.72}
+                accessibilityRole="button"
+                onPress={action}
+                style={[
+                    styles.wrapper,
+                    {
+                        backgroundColor: colors.card,
+                        borderColor: Color(colors.text).alpha(0.05).toString(),
+                    },
+                ]}>
+                <View
+                    style={[
+                        styles.iconWell,
+                        { backgroundColor: Color(accent).alpha(0.13).toString() },
+                    ]}>
+                    <Icon
+                        accessible={false}
+                        name={iconName}
+                        color={accent}
+                        size={rpx(42)}
+                    />
+                </View>
                 <ThemeText
                     accessible={false}
                     fontSize="subTitle"
                     fontWeight="semibold"
+                    numberOfLines={1}
                     style={styles.text}>
                     {title}
                 </ThemeText>
-            </>
-        </TouchableOpacity>
+            </TouchableOpacity>
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
     wrapper: {
-        width: rpx(140),
-        height: rpx(144),
-        borderRadius: rpx(12),
-        flexGrow: 1,
-        flexShrink: 0,
+        width: "100%",
+        height: "100%",
+        borderRadius: rpx(26),
+        borderWidth: StyleSheet.hairlineWidth,
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
     },
+    iconWell: {
+        width: rpx(74),
+        height: rpx(74),
+        borderRadius: rpx(24),
+        alignItems: "center",
+        justifyContent: "center",
+    },
     text: {
-        marginTop: rpx(12),
+        marginTop: rpx(14),
     },
 });

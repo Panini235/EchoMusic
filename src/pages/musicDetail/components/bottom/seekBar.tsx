@@ -26,9 +26,9 @@ export default function SeekBar() {
             <TimeLabel time={tmpProgress ?? progress.position} />
             <Slider
                 style={style.slider}
-                minimumTrackTintColor={"#cccccc"}
-                maximumTrackTintColor={"#999999"}
-                thumbTintColor={"#dddddd"}
+                minimumTrackTintColor={"#FFFFFF"}
+                maximumTrackTintColor={"rgba(255,255,255,0.24)"}
+                thumbTintColor={"#FFFFFF"}
                 minimumValue={0}
                 maximumValue={progress.duration}
                 onSlidingStart={() => {

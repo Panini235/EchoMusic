@@ -1,7 +1,7 @@
 import repeatModeConst from "@/constants/repeatModeConst";
 import rpx from "@/utils/rpx";
 import React from "react";
-import { InteractionManager, StyleSheet, View } from "react-native";
+import { InteractionManager, Pressable, StyleSheet, View } from "react-native";
 
 import Icon from "@/components/base/icon.tsx";
 import { showPanel } from "@/components/panels/usePanel";
@@ -16,18 +16,12 @@ export default function () {
 
     const orientation = useOrientation();
 
-    console.log(repeatMode, repeatModeConst[repeatMode]);
-
     return (
         <>
             <View
                 style={[
                     style.wrapper,
-                    orientation === "horizontal"
-                        ? {
-                            marginTop: 0,
-                        }
-                        : null,
+                    orientation === "horizontal" ? style.horizontalWrapper : null,
                 ]}>
                 <Icon
                     color={"white"}
@@ -48,18 +42,25 @@ export default function () {
                         TrackPlayer.skipToPrevious();
                     }}
                 />
-                <Icon
-                    color={"white"}
-                    name={musicIsPaused(musicState) ? "play" : "pause"}
-                    size={rpx(96)}
+                <Pressable
+                    accessibilityRole="button"
+                    style={({ pressed }) => [
+                        style.playButton,
+                        pressed ? style.playButtonPressed : null,
+                    ]}
                     onPress={() => {
                         if (musicIsPaused(musicState)) {
                             TrackPlayer.play();
                         } else {
                             TrackPlayer.pause();
                         }
-                    }}
-                />
+                    }}>
+                    <Icon
+                        color={"#241F1B"}
+                        name={musicIsPaused(musicState) ? "play" : "pause"}
+                        size={rpx(66)}
+                    />
+                </Pressable>
                 <Icon
                     color={"white"}
                     name={"skip-right"}
@@ -89,5 +90,25 @@ const style = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
+    },
+    horizontalWrapper: {
+        marginTop: 0,
+    },
+    playButton: {
+        width: rpx(104),
+        height: rpx(104),
+        borderRadius: rpx(52),
+        backgroundColor: "rgba(255,255,255,0.94)",
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#000",
+        shadowOpacity: 0.18,
+        shadowRadius: rpx(18),
+        shadowOffset: { width: 0, height: rpx(8) },
+        elevation: 8,
+    },
+    playButtonPressed: {
+        opacity: 0.82,
+        transform: [{ scale: 0.96 }],
     },
 });

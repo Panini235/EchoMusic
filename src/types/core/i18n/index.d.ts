@@ -72,6 +72,14 @@ export interface ILanguageData {
     "home.starredPlaylistsCount.a11y": string; // 我喜欢的歌单数量
     "home.songCount": string; // 歌曲数量
     "home.clickToSearch": string; // 点击搜索
+    "home.brand": string;
+    "home.brandTagline": string;
+    "home.pluginCompatible": string;
+    "home.sourceConnected": string;
+    "home.heroTitle": string;
+    "home.heroDescription": string;
+    "home.searchAllSources": string;
+    "home.addSource": string;
 
     // 对话框相关
     "dialog.deleteSheetTitle": string; // 删除歌单
@@ -193,6 +201,12 @@ export interface ILanguageData {
     "pluginSetting.menu.installPluginDialogPlaceholder": string; // 插件安装对话框占位符
     "pluginSetting.menu.pluginInstallFailedDialogTitle": string; // 插件安装失败对话框标题
     "pluginSetting.menu.pluginUpdateFailedDialogTitle": string; // 插件更新失败对话框标题
+    "pluginSetting.connectedCount": string;
+    "pluginSetting.connectedDescription": string;
+    "pluginSetting.welcomeTitle": string;
+    "pluginSetting.welcomeDescription": string;
+    "pluginSetting.openDocs": string;
+    "pluginSetting.legalTip": string;
     "pluginSetting.fabOptions.installFromLocal": string; // 从本地安装
     "pluginSetting.fabOptions.installFromNetwork": string; // 从网络安装
     "pluginSetting.fabOptions.updateAllPlugins": string; // 更新所有插件

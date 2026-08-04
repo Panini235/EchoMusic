@@ -12,6 +12,7 @@ export default function Operations() {
     const actionButtons = [
         {
             iconName: "fire",
+            iconColor: "#E06B52",
             title: t("home.recommendSheet"),
             action() {
                 navigate(ROUTE_PATH.RECOMMEND_SHEETS);
@@ -19,6 +20,7 @@ export default function Operations() {
         },
         {
             iconName: "trophy",
+            iconColor: "#C9912E",
             title: t("home.topList"),
             action() {
                 navigate(ROUTE_PATH.TOP_LIST);
@@ -26,6 +28,7 @@ export default function Operations() {
         },
         {
             iconName: "clock-outline",
+            iconColor: "#7567C8",
             title: t("home.playHistory"),
             action() {
                 navigate(ROUTE_PATH.HISTORY);
@@ -33,6 +36,7 @@ export default function Operations() {
         },
         {
             iconName: "folder-music-outline",
+            iconColor: "#4D8E79",
             title: t("home.localMusic"),
             action() {
                 navigate(ROUTE_PATH.LOCAL);
@@ -44,10 +48,8 @@ export default function Operations() {
         <View style={styles.container}>
             {actionButtons.map((action, index) => (
                 <ActionButton
-                    style={[
-                        styles.actionButtonStyle,
-                        index % 4 ? styles.actionMarginLeft : null,
-                    ]}
+                    style={styles.actionButtonStyle}
+                    delay={80 + index * 45}
                     key={action.title}
                     {...action}
                 />
@@ -59,17 +61,14 @@ export default function Operations() {
 const styles = StyleSheet.create({
     container: {
         width: rpx(750),
-        paddingHorizontal: rpx(24),
-        marginVertical: rpx(32),
+        paddingHorizontal: rpx(28),
+        marginTop: rpx(28),
+        marginBottom: rpx(36),
         flexDirection: "row",
-        flexWrap: "nowrap",
+        gap: rpx(16),
     },
     actionButtonStyle: {
-        width: rpx(157.5),
-        height: rpx(160),
-        borderRadius: rpx(18),
-    },
-    actionMarginLeft: {
-        marginLeft: rpx(24),
+        width: rpx(161.5),
+        height: rpx(164),
     },
 });

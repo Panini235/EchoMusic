@@ -51,10 +51,10 @@ export default function NavBar() {
                     try {
                         await Share.open({
                             type: "image/jpeg",
-                            title: "MusicFree-一个插件化的免费音乐播放器",
-                            message: "MusicFree-一个插件化的免费音乐播放器",
+                            title: "畅听 · 插件化音乐播放器",
+                            message: "畅听 · 安静、自由的插件化音乐播放器",
                             url: B64Asset.share,
-                            subject: "MusicFree分享",
+                            subject: "畅听分享",
                         });
                     } catch {}
                 }}
@@ -66,7 +66,7 @@ export default function NavBar() {
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        height: rpx(150),
+        height: rpx(124),
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     },
     headerContent: {
         flex: 1,
-        height: rpx(150),
+        height: rpx(124),
         justifyContent: "center",
         alignItems: "center",
     },

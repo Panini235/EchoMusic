@@ -44,7 +44,7 @@ export default function Pages() {
                             screenOptions={{
                                 headerShown: false,
                                 animation: "slide_from_right",
-                                animationDuration: 100,
+                                animationDuration: 260,
                             }}>
                             {routes.map(route => (
                                 <Stack.Screen

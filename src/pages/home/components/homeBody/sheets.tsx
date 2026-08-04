@@ -16,6 +16,7 @@ import { FlashList } from "@shopify/flash-list";
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import Color from "color";
 
 export default function Sheets() {
     const [index, setIndex] = useState(0);
@@ -115,6 +116,7 @@ export default function Sheets() {
             </View>
             <FlashList
                 ListEmptyComponent={<Empty />}
+                contentContainerStyle={styles.listContent}
                 extraData={{ t }}
                 data={(index === 0 ? allSheets : staredSheets) ?? []}
                 estimatedItemSize={ListItem.Size.big}
@@ -125,66 +127,77 @@ export default function Sheets() {
 
 
                     return (
-                        <ListItem
+                        <View
                             key={`${sheet.id}`}
-                            heightType="big"
-                            withHorizontalPadding
-                            onPress={() => {
-                                if (isLocalSheet) {
-                                    navigate(ROUTE_PATH.LOCAL_SHEET_DETAIL, {
-                                        id: sheet.id,
-                                    });
-                                } else {
-                                    navigate(ROUTE_PATH.PLUGIN_SHEET_DETAIL, {
-                                        sheetInfo: sheet,
-                                    });
-                                }
-                            }}>
-                            <ListItem.ListItemImage
-                                uri={sheet.coverImg ?? sheet.artwork}
-                                fallbackImg={ImgAsset.albumDefault}
-                                maskIcon={
-                                    sheet.id === MusicSheet.defaultSheet.id
-                                        ? "heart"
-                                        : null
-                                }
-                            />
-                            <ListItem.Content
-                                title={sheet.title}
-                                description={
-                                    isLocalSheet
-                                        ? t("home.songCount", { count: sheet.worksNum })
-                                        : `${sheet.artist ?? ""}`
-                                }
-                            />
-                            {sheet.id !== MusicSheet.defaultSheet.id ? (
-                                <ListItem.ListItemIcon
-                                    position="right"
-                                    icon="trash-outline"
-                                    onPress={() => {
-                                        showDialog("SimpleDialog", {
-                                            title: t("dialog.deleteSheetTitle"),
-                                            content: t("dialog.deleteSheetContent", {
-                                                name: sheet.title,
-                                            }),
-                                            onOk: async () => {
-                                                if (isLocalSheet) {
-                                                    await MusicSheet.removeSheet(
-                                                        sheet.id,
-                                                    );
-                                                    Toast.success(t("toast.deleteSuccess"));
-                                                } else {
-                                                    await MusicSheet.unstarMusicSheet(
-                                                        sheet,
-                                                    );
-                                                    Toast.success(t("toast.hasUnstarred"));
-                                                }
-                                            },
+                            style={[
+                                styles.sheetCard,
+                                {
+                                    backgroundColor: colors.card,
+                                    borderColor: Color(colors.text)
+                                        .alpha(0.05)
+                                        .toString(),
+                                },
+                            ]}>
+                            <ListItem
+                                heightType="big"
+                                withHorizontalPadding
+                                onPress={() => {
+                                    if (isLocalSheet) {
+                                        navigate(ROUTE_PATH.LOCAL_SHEET_DETAIL, {
+                                            id: sheet.id,
                                         });
-                                    }}
+                                    } else {
+                                        navigate(ROUTE_PATH.PLUGIN_SHEET_DETAIL, {
+                                            sheetInfo: sheet,
+                                        });
+                                    }
+                                }}>
+                                <ListItem.ListItemImage
+                                    uri={sheet.coverImg ?? sheet.artwork}
+                                    fallbackImg={ImgAsset.albumDefault}
+                                    maskIcon={
+                                        sheet.id === MusicSheet.defaultSheet.id
+                                            ? "heart"
+                                            : null
+                                    }
                                 />
-                            ) : null}
-                        </ListItem>
+                                <ListItem.Content
+                                    title={sheet.title}
+                                    description={
+                                        isLocalSheet
+                                            ? t("home.songCount", { count: sheet.worksNum })
+                                            : `${sheet.artist ?? ""}`
+                                    }
+                                />
+                                {sheet.id !== MusicSheet.defaultSheet.id ? (
+                                    <ListItem.ListItemIcon
+                                        position="right"
+                                        icon="trash-outline"
+                                        onPress={() => {
+                                            showDialog("SimpleDialog", {
+                                                title: t("dialog.deleteSheetTitle"),
+                                                content: t("dialog.deleteSheetContent", {
+                                                    name: sheet.title,
+                                                }),
+                                                onOk: async () => {
+                                                    if (isLocalSheet) {
+                                                        await MusicSheet.removeSheet(
+                                                            sheet.id,
+                                                        );
+                                                        Toast.success(t("toast.deleteSuccess"));
+                                                    } else {
+                                                        await MusicSheet.unstarMusicSheet(
+                                                            sheet,
+                                                        );
+                                                        Toast.success(t("toast.hasUnstarred"));
+                                                    }
+                                                },
+                                            });
+                                        }}
+                                    />
+                                ) : null}
+                            </ListItem>
+                        </View>
                     );
                 }}
                 nestedScrollEnabled
@@ -195,24 +208,24 @@ export default function Sheets() {
 
 const styles = StyleSheet.create({
     subTitleContainer: {
-        paddingHorizontal: rpx(24),
+        paddingHorizontal: rpx(28),
         flexDirection: "row",
         alignItems: "flex-start",
-        marginBottom: rpx(12),
+        marginBottom: rpx(18),
     },
     subTitleLeft: {
         flexDirection: "row",
     },
     tabContainer: {
         flexDirection: "row",
-        marginRight: rpx(32),
+        marginRight: rpx(28),
     },
 
     tabText: {
-        lineHeight: rpx(64),
+        lineHeight: rpx(68),
     },
     selectTabText: {
-        borderBottomWidth: rpx(6),
+        borderBottomWidth: rpx(5),
         fontWeight: "bold",
     },
     more: {
@@ -224,5 +237,14 @@ const styles = StyleSheet.create({
     },
     newSheetButton: {
         marginRight: rpx(24),
+    },
+    listContent: {
+        paddingHorizontal: rpx(28),
+    },
+    sheetCard: {
+        marginBottom: rpx(14),
+        borderRadius: rpx(24),
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: "hidden",
     },
 });

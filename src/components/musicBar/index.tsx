@@ -11,6 +11,8 @@ import TrackPlayer, { useCurrentMusic, useMusicState, useProgress } from "@/core
 import { musicIsPaused } from "@/utils/trackUtils";
 import MusicInfo from "./musicInfo";
 import Icon from "@/components/base/icon.tsx";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import Color from "color";
 
 function CircularPlayBtn() {
     const progress = useProgress();
@@ -21,8 +23,8 @@ function CircularPlayBtn() {
 
     return (
         <CircularProgressBase
-            activeStrokeWidth={rpx(4)}
-            inActiveStrokeWidth={rpx(2)}
+            activeStrokeWidth={rpx(5)}
+            inActiveStrokeWidth={rpx(4)}
             inActiveStrokeOpacity={0.2}
             value={
                 progress?.duration
@@ -30,8 +32,8 @@ function CircularPlayBtn() {
                     : 0
             }
             duration={100}
-            radius={rpx(36)}
-            activeStrokeColor={colors.musicBarText}
+            radius={rpx(31)}
+            activeStrokeColor={colors.primary}
             inActiveStrokeColor={colors.textSecondary}>
             <IconButton
                 accessibilityLabel={"播放或暂停歌曲"}
@@ -80,12 +82,17 @@ function MusicBar() {
     return (
         <>
             {musicItem && !showKeyboard && (
-                <View
+                <Animated.View
+                    entering={FadeInDown.duration(360).springify()}
                     style={[
                         style.wrapper,
                         {
                             backgroundColor: colors.musicBar,
-                            paddingRight: safeAreaInsets.right + rpx(24),
+                            borderColor: Color(colors.musicBarText)
+                                .alpha(0.08)
+                                .toString(),
+                            shadowColor: colors.shadow,
+                            paddingRight: safeAreaInsets.right + rpx(18),
                         },
                     ]}
                     accessible
@@ -109,7 +116,7 @@ function MusicBar() {
                             style={[style.actionIcon]}
                         />
                     </View>
-                </View>
+                </Animated.View>
             )}
         </>
     );
@@ -119,19 +126,28 @@ export default memo(MusicBar, () => true);
 
 const style = StyleSheet.create({
     wrapper: {
-        width: "100%",
-        height: rpx(132),
+        height: rpx(116),
+        marginHorizontal: rpx(20),
+        marginTop: rpx(8),
+        marginBottom: rpx(10),
+        borderRadius: rpx(30),
+        borderWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",
-        paddingRight: rpx(24),
+        paddingRight: rpx(18),
+        shadowOpacity: 0.14,
+        shadowRadius: rpx(18),
+        shadowOffset: { width: 0, height: rpx(8) },
+        elevation: 8,
+        overflow: "hidden",
     },
     actionGroup: {
-        width: rpx(200),
+        width: rpx(170),
         justifyContent: "flex-end",
         flexDirection: "row",
         alignItems: "center",
     },
     actionIcon: {
-        marginLeft: rpx(36),
+        marginLeft: rpx(28),
     },
 });
