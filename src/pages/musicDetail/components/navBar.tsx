@@ -2,16 +2,17 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import rpx from "@/utils/rpx";
 import { useNavigation } from "@react-navigation/native";
-import Tag from "@/components/base/tag";
 import { fontSizeConst, fontWeightConst } from "@/constants/uiConst";
 import Share from "react-native-share";
 import { B64Asset } from "@/constants/assetsConst";
 import IconButton from "@/components/base/iconButton";
 import { useCurrentMusic } from "@/core/trackPlayer";
+import { useI18N } from "@/core/i18n";
 
 export default function NavBar() {
     const navigation = useNavigation();
     const musicItem = useCurrentMusic();
+    const { t } = useI18N();
     // const {showShare} = useShare();
 
     return (
@@ -26,21 +27,14 @@ export default function NavBar() {
                 }}
             />
             <View style={styles.headerContent}>
+                <Text numberOfLines={1} style={styles.eyebrow}>
+                    {musicItem?.platform
+                        ? `${t("musicDetail.nowPlaying")} · ${musicItem.platform}`
+                        : t("musicDetail.nowPlaying")}
+                </Text>
                 <Text numberOfLines={1} style={styles.headerTitleText}>
                     {musicItem?.title ?? "--"}
                 </Text>
-                <View style={styles.headerDesc}>
-                    <Text style={styles.headerArtistText} numberOfLines={1}>
-                        {musicItem?.artist}
-                    </Text>
-                    {musicItem?.platform ? (
-                        <Tag
-                            tagName={musicItem.platform}
-                            containerStyle={styles.tagBg}
-                            style={styles.tagText}
-                        />
-                    ) : null}
-                </View>
             </View>
             <IconButton
                 name="share"
@@ -73,6 +67,10 @@ const styles = StyleSheet.create({
     },
     button: {
         marginHorizontal: rpx(24),
+        width: rpx(72),
+        height: rpx(72),
+        borderRadius: rpx(36),
+        backgroundColor: "rgba(255,255,255,0.12)",
     },
     headerContent: {
         flex: 1,
@@ -80,28 +78,19 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    eyebrow: {
+        color: "rgba(255,255,255,0.58)",
+        fontWeight: fontWeightConst.semibold,
+        fontSize: fontSizeConst.description,
+        letterSpacing: 1.1,
+        includeFontPadding: false,
+        textTransform: "uppercase",
+    },
     headerTitleText: {
         color: "white",
         fontWeight: fontWeightConst.semibold,
-        fontSize: fontSizeConst.title,
-        marginBottom: rpx(12),
-        includeFontPadding: false,
-    },
-    headerDesc: {
-        height: rpx(32),
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: rpx(40),
-    },
-    headerArtistText: {
-        color: "white",
         fontSize: fontSizeConst.subTitle,
+        marginTop: rpx(7),
         includeFontPadding: false,
-    },
-    tagBg: {
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-    },
-    tagText: {
-        color: "white",
     },
 });

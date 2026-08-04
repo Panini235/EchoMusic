@@ -5,6 +5,7 @@ import Lyric from "./lyric";
 import useOrientation from "@/hooks/useOrientation";
 import Config from "@/core/appConfig";
 import globalStyle from "@/constants/globalStyle";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export default function Content() {
     const [tab, selectTab] = useState<"album" | "lyric">(
@@ -27,9 +28,19 @@ export default function Content() {
     return (
         <View style={globalStyle.fwflex1}>
             {showAlbumCover ? (
-                <AlbumCover onTurnPageClick={onTurnPageClick} />
+                <Animated.View
+                    key="album"
+                    entering={FadeIn.duration(300)}
+                    style={globalStyle.fwflex1}>
+                    <AlbumCover onTurnPageClick={onTurnPageClick} />
+                </Animated.View>
             ) : (
-                <Lyric onTurnPageClick={onTurnPageClick} />
+                <Animated.View
+                    key="lyric"
+                    entering={FadeIn.duration(300)}
+                    style={globalStyle.fwflex1}>
+                    <Lyric onTurnPageClick={onTurnPageClick} />
+                </Animated.View>
             )}
         </View>
     );

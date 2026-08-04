@@ -1,3 +1,5 @@
 {"version":"0.6.2","changeLog":[
-  "【优化】优化了软件启动速度 (需要在【侧边栏-基本设置-插件】中打开【启用插件懒加载】开关)"
-],"download":["https://r0rvr854dd1.feishu.cn/drive/folder/KLqKfWOA3lx8MKdo8xNcYpR8n7t"]}
+  "【品牌】升级为 EchoMusic · 畅听",
+  "【界面】重构首页、播放器、侧边栏与浮层视觉",
+  "【体验】启动时不再主动申请文件权限"
+],"download":["https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml"]}

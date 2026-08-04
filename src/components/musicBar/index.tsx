@@ -83,13 +83,15 @@ function MusicBar() {
         <>
             {musicItem && !showKeyboard && (
                 <Animated.View
-                    entering={FadeInDown.duration(360).springify()}
+                    entering={FadeInDown.duration(420).springify().damping(18)}
                     style={[
                         style.wrapper,
                         {
-                            backgroundColor: colors.musicBar,
+                            backgroundColor: Color(colors.musicBar)
+                                .alpha(0.90)
+                                .toString(),
                             borderColor: Color(colors.musicBarText)
-                                .alpha(0.08)
+                                .alpha(0.12)
                                 .toString(),
                             shadowColor: colors.shadow,
                             paddingRight: safeAreaInsets.right + rpx(18),
@@ -130,15 +132,15 @@ const style = StyleSheet.create({
         marginHorizontal: rpx(20),
         marginTop: rpx(8),
         marginBottom: rpx(10),
-        borderRadius: rpx(30),
+        borderRadius: rpx(32),
         borderWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",
         paddingRight: rpx(18),
-        shadowOpacity: 0.14,
-        shadowRadius: rpx(18),
-        shadowOffset: { width: 0, height: rpx(8) },
-        elevation: 8,
+        shadowOpacity: 0.18,
+        shadowRadius: rpx(22),
+        shadowOffset: { width: 0, height: rpx(10) },
+        elevation: 10,
         overflow: "hidden",
     },
     actionGroup: {

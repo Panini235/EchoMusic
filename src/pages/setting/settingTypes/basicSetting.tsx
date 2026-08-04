@@ -24,6 +24,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SectionList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { readdir } from "react-native-fs";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
+import Color from "color";
 
 function createSwitch(
     title: string,
@@ -103,6 +104,8 @@ function useCacheSize() {
 }
 
 export default function BasicSetting() {
+
+    const colors = useColors();
 
     const autoPlayWhenAppStart = useAppConfig("basic.autoPlayWhenAppStart");
     const useCelluarNetworkPlay = useAppConfig("basic.useCelluarNetworkPlay");
@@ -588,7 +591,13 @@ export default function BasicSetting() {
                             });
                         }}
                         activeOpacity={0.7}
-                        style={styles.headerItemStyle}>
+                        style={[
+                            styles.headerItemStyle,
+                            {
+                                backgroundColor: Color(colors.card).alpha(0.92).toString(),
+                                borderColor: Color(colors.text).alpha(0.07).toString(),
+                            },
+                        ]}>
                         <ThemeText fontWeight="bold">{item}</ThemeText>
                     </TouchableOpacity>
                 )}
@@ -609,17 +618,30 @@ export default function BasicSetting() {
                 renderSectionFooter={({ section }) => {
                     return section.footer ?? null;
                 }}
-                renderItem={({ item }) => {
+                renderItem={({ item, index, section }) => {
                     const Right = item.right;
 
                     return (
-                        <ListItem
-                            withHorizontalPadding
-                            heightType="small"
-                            onPress={item.onPress}>
-                            <ListItem.Content title={item.title} />
-                            {Right}
-                        </ListItem>
+                        <View
+                            style={[
+                                styles.settingRow,
+                                index === 0 ? styles.settingRowFirst : null,
+                                index === section.data.length - 1
+                                    ? styles.settingRowLast
+                                    : null,
+                                {
+                                    backgroundColor: Color(colors.card).alpha(0.92).toString(),
+                                    borderColor: Color(colors.text).alpha(0.06).toString(),
+                                },
+                            ]}>
+                            <ListItem
+                                withHorizontalPadding
+                                heightType="small"
+                                onPress={item.onPress}>
+                                <ListItem.Content title={item.title} />
+                                {Right}
+                            </ListItem>
+                        </View>
                     );
                 }}
             />
@@ -651,12 +673,32 @@ const styles = StyleSheet.create({
         height: rpx(80),
         alignItems: "center",
         paddingHorizontal: rpx(24),
+        gap: rpx(10),
     },
     headerItemStyle: {
-        paddingHorizontal: rpx(36),
-        height: rpx(80),
+        paddingHorizontal: rpx(28),
+        height: rpx(60),
         justifyContent: "center",
         alignItems: "center",
+        borderRadius: rpx(22),
+        borderWidth: StyleSheet.hairlineWidth,
+    },
+    settingRow: {
+        marginHorizontal: rpx(24),
+        borderLeftWidth: StyleSheet.hairlineWidth,
+        borderRightWidth: StyleSheet.hairlineWidth,
+        overflow: "hidden",
+    },
+    settingRowFirst: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopLeftRadius: rpx(24),
+        borderTopRightRadius: rpx(24),
+    },
+    settingRowLast: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomLeftRadius: rpx(24),
+        borderBottomRightRadius: rpx(24),
+        marginBottom: rpx(10),
     },
 });
 
@@ -717,7 +759,7 @@ function LyricSetting() {
                             fontSize: Config.getConfig("lyric.fontSize"),
                         };
                         LyricUtil.showStatusBarLyric(
-                            "MusicFree",
+                            "畅听",
                             statusBarLyricConfig ?? {}
                         );
                         Config.setConfig("lyric.showStatusBarLyric", true);

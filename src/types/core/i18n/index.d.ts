@@ -80,6 +80,7 @@ export interface ILanguageData {
     "home.heroDescription": string;
     "home.searchAllSources": string;
     "home.addSource": string;
+    "musicDetail.nowPlaying": string;
 
     // 对话框相关
     "dialog.deleteSheetTitle": string; // 删除歌单
@@ -417,15 +418,6 @@ export interface ILanguageData {
     "noPlugin.title": string; // 还没有安装插件
     "noPlugin.titleWithType": string; // 还没有安装支持类型的插件
     "noPlugin.description": string; // 无插件描述
-
-    // 对话框相关 - 存储权限
-    "dialog.checkStorage.title": string; // 存储权限
-    "dialog.checkStorage.content.0": string; // 存储权限内容0
-    "dialog.checkStorage.content.1": string; // 存储权限内容1
-    "dialog.checkStorage.content.2": string; // 存储权限内容2
-    "dialog.checkStorage.content.3": string; // 存储权限内容3
-    "dialog.checkStorage.button.grantPermission": string; // 去授予权限
-    "dialog.checkStorage.button.doNotShowAgain": string; // 不再提示
 
     // 对话框相关 - 下载
     "dialog.downloadDialog.title": string; // 发现新版本

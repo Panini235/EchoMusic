@@ -146,14 +146,17 @@ export default function BackupSetting() {
             password: password,
         });
 
-        if (!(await client.exists("/MusicFree/MusicFreeBackup.json"))) {
+        const backupPath = (await client.exists("/EchoMusic/EchoMusicBackup.json"))
+            ? "/EchoMusic/EchoMusicBackup.json"
+            : "/MusicFree/MusicFreeBackup.json";
+        if (!(await client.exists(backupPath))) {
             Toast.warn(t("toast.backupFileNotFound"));
             return;
         }
 
         try {
             const resumeData = await client.getFileContents(
-                "/MusicFree/MusicFreeBackup.json",
+                backupPath,
                 {
                     format: "text",
                 },
@@ -184,12 +187,12 @@ export default function BackupSetting() {
             });
 
             const raw = Backup.backup();
-            if (!(await client.exists("/MusicFree"))) {
-                await client.createDirectory("/MusicFree");
+            if (!(await client.exists("/EchoMusic"))) {
+                await client.createDirectory("/EchoMusic");
             }
             // 临时文件
             await client.putFileContents(
-                "/MusicFree/MusicFreeBackup.json",
+                "/EchoMusic/EchoMusicBackup.json",
                 raw,
                 {
                     overwrite: true,

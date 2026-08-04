@@ -113,7 +113,7 @@ export default function MusicItemLyricOptions(
                             fontSize: Config.getConfig("lyric.fontSize"),
                         };
                         LyricUtil.showStatusBarLyric(
-                            "MusicFree",
+                            "畅听",
                             statusBarLyricConfig ?? {}
                         );
                         Config.setConfig("lyric.showStatusBarLyric", true);

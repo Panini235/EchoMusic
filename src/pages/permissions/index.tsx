@@ -9,8 +9,10 @@ import { useI18N } from "@/core/i18n";
 import LyricUtil from "@/native/lyricUtil";
 import NativeUtils from "@/native/utils";
 import rpx from "@/utils/rpx";
+import useColors from "@/hooks/useColors";
+import Color from "color";
 import React, { useEffect, useRef, useState } from "react";
-import { AppState, StyleSheet } from "react-native";
+import { AppState, ScrollView, StyleSheet, View } from "react-native";
 
 type IPermissionTypes = "floatingWindow" | "fileStorage";
 
@@ -24,6 +26,7 @@ export default function Permissions() {
         // background: false,
     });
     const { t } = useI18N();
+    const colors = useColors();
 
     async function checkPermission(type?: IPermissionTypes) {
         let newPermission = {
@@ -70,33 +73,45 @@ export default function Permissions() {
         <VerticalSafeAreaView style={globalStyle.fwflex1}>
             <StatusBar />
             <AppBar>{t("permissionSetting.title")}</AppBar>
-            <ThemeText style={styles.description}>
-                {t("permissionSetting.description")}
-            </ThemeText>
-            <ListItem
-                withHorizontalPadding
-                heightType="big"
-                onPress={() => {
-                    LyricUtil.requestSystemAlertPermission();
-                }}>
-                <ListItem.Content
-                    title={t("permissionSetting.floatWindowPermission")}
-                    description={t("permissionSetting.floatWindowPermissionDescription")}
-                />
-                <ThemeSwitch value={permissions.floatingWindow} />
-            </ListItem>
-            <ListItem
-                withHorizontalPadding
-                heightType="big"
-                onPress={() => {
-                    NativeUtils.requestStoragePermission();
-                }}>
-                <ListItem.Content
-                    title={t("permissionSetting.fileReadWritePermission")}
-                    description={t("permissionSetting.fileReadWritePermissionDescription")}
-                />
-                <ThemeSwitch value={permissions.fileStorage} />
-            </ListItem>
+            <ScrollView contentContainerStyle={styles.content}>
+                <ThemeText fontColor="textSecondary" style={styles.description}>
+                    {t("permissionSetting.description")}
+                </ThemeText>
+                <View
+                    style={[
+                        styles.card,
+                        {
+                            backgroundColor: Color(colors.card).alpha(0.92).toString(),
+                            borderColor: Color(colors.text).alpha(0.08).toString(),
+                        },
+                    ]}>
+                    <ListItem
+                        withHorizontalPadding
+                        heightType="big"
+                        onPress={() => {
+                            LyricUtil.requestSystemAlertPermission();
+                        }}>
+                        <ListItem.Content
+                            title={t("permissionSetting.floatWindowPermission")}
+                            description={t("permissionSetting.floatWindowPermissionDescription")}
+                        />
+                        <ThemeSwitch value={permissions.floatingWindow} />
+                    </ListItem>
+                    <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+                    <ListItem
+                        withHorizontalPadding
+                        heightType="big"
+                        onPress={() => {
+                            NativeUtils.requestStoragePermission();
+                        }}>
+                        <ListItem.Content
+                            title={t("permissionSetting.fileReadWritePermission")}
+                            description={t("permissionSetting.fileReadWritePermissionDescription")}
+                        />
+                        <ThemeSwitch value={permissions.fileStorage} />
+                    </ListItem>
+                </View>
+            </ScrollView>
             {/* <ListItem withHorizontalPadding heightType="big">
                 <ListItem.Content
                     title="后台运行"
@@ -110,7 +125,19 @@ export default function Permissions() {
 const styles = StyleSheet.create({
     description: {
         width: "100%",
-        paddingHorizontal: rpx(24),
-        marginVertical: rpx(36),
+        marginBottom: rpx(22),
+        lineHeight: rpx(42),
+    },
+    content: {
+        padding: rpx(24),
+    },
+    card: {
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: "hidden",
+    },
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        marginLeft: rpx(24),
     },
 });

@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ImgAsset } from "@/constants/assetsConst";
 import { useCurrentMusic } from "@/core/trackPlayer";
 import LinearGradient from "react-native-linear-gradient";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 export default function Background() {
     const musicItem = useCurrentMusic();
@@ -24,10 +25,17 @@ export default function Background() {
     return (
         <>
             <View style={style.background} />
-            <Image style={style.blur} blurRadius={42} source={artworkSource} />
+            <Animated.Image
+                key={`${musicItem?.platform ?? "local"}-${musicItem?.id ?? musicItem?.title ?? "empty"}`}
+                entering={FadeIn.duration(650)}
+                exiting={FadeOut.duration(220)}
+                style={style.blur}
+                blurRadius={32}
+                source={artworkSource}
+            />
             <LinearGradient
-                colors={["rgba(9,8,7,0.34)", "rgba(9,8,7,0.50)", "rgba(9,8,7,0.90)"]}
-                locations={[0, 0.48, 1]}
+                colors={["rgba(8,8,9,0.26)", "rgba(8,8,9,0.48)", "rgba(8,8,9,0.94)"]}
+                locations={[0, 0.50, 1]}
                 style={style.overlay}
             />
         </>
@@ -53,8 +61,8 @@ const style = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        opacity: 0.62,
-        transform: [{ scale: 1.12 }],
+        opacity: 0.54,
+        transform: [{ scale: 1.08 }],
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,

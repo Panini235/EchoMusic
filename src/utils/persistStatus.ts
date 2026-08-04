@@ -26,8 +26,6 @@ interface IPersistStatus {
     "music.quality": IMusic.IQualityKey;
     /** app */
     "app.skipVersion": string;
-    /** 开屏弹窗 */
-    "app.skipBootstrapStorageDialog": boolean;
     /** 语言设置 */
     "app.language": string;
     /** 上次更新插件的时间 */

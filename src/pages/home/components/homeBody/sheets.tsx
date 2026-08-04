@@ -14,8 +14,7 @@ import rpx from "@/utils/rpx";
 import Toast from "@/utils/toast";
 import { FlashList } from "@shopify/flash-list";
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { Pressable, StyleSheet, View } from "react-native";
 import Color from "color";
 
 export default function Sheets() {
@@ -28,72 +27,73 @@ export default function Sheets() {
     const { t } = useI18N();
 
     const selectedTabTextStyle = useMemo(() => {
-        return [
-            styles.selectTabText,
-            {
-                borderBottomColor: colors.primary,
-            },
-        ];
+        return [styles.selectTab, { backgroundColor: colors.card }];
     }, [colors]);
 
 
     return (
         <>
             <View style={styles.subTitleContainer}>
-                <TouchableWithoutFeedback
-                    style={styles.tabContainer}
-                    accessible
-                    accessibilityLabel={t("home.myPlaylistsCount.a11y", {
-                        count: allSheets.length,
-                    })}
-                    onPress={() => {
-                        setIndex(0);
-                    }}>
-                    <ThemeText
-                        accessible={false}
-                        fontSize="title"
-                        style={[
-                            styles.tabText,
+                <View style={[styles.segmented, { backgroundColor: colors.placeholder }]}>
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.tabContainer,
                             index === 0 ? selectedTabTextStyle : null,
-                        ]}>
-                        {t("home.myPlaylists")}
-                    </ThemeText>
-                    <ThemeText
-                        accessible={false}
-                        fontColor="textSecondary"
-                        fontSize="subTitle"
-                        style={styles.tabText}>
-                        {" "}
+                            pressed ? styles.tabPressed : null,
+                        ]}
+                        accessible
+                        accessibilityLabel={t("home.myPlaylistsCount.a11y", {
+                            count: allSheets.length,
+                        })}
+                        onPress={() => {
+                            setIndex(0);
+                        }}>
+                        <ThemeText
+                            accessible={false}
+                            fontSize="title"
+                            fontWeight={index === 0 ? "bold" : "medium"}
+                            style={styles.tabText}>
+                            {t("home.myPlaylists")}
+                        </ThemeText>
+                        <ThemeText
+                            accessible={false}
+                            fontColor="textSecondary"
+                            fontSize="subTitle"
+                            style={styles.tabText}>
+                            {" "}
                         ({allSheets.length})
-                    </ThemeText>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback
-                    style={styles.tabContainer}
-                    accessible
-                    accessibilityLabel={t("home.starredPlaylistsCount.a11y", {
-                        count: allSheets.length,
-                    })}
-                    onPress={() => {
-                        setIndex(1);
-                    }}>
-                    <ThemeText
-                        fontSize="title"
-                        accessible={false}
-                        style={[
-                            styles.tabText,
+                        </ThemeText>
+                    </Pressable>
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.tabContainer,
                             index === 1 ? selectedTabTextStyle : null,
-                        ]}>
-                        {t("home.starredPlaylists")}
-                    </ThemeText>
-                    <ThemeText
-                        fontColor="textSecondary"
-                        fontSize="subTitle"
-                        accessible={false}
-                        style={styles.tabText}>
-                        {" "}
+                            pressed ? styles.tabPressed : null,
+                        ]}
+                        accessible
+                        accessibilityLabel={t("home.starredPlaylistsCount.a11y", {
+                            count: allSheets.length,
+                        })}
+                        onPress={() => {
+                            setIndex(1);
+                        }}>
+                        <ThemeText
+                            fontSize="title"
+                            accessible={false}
+                            fontWeight={index === 1 ? "bold" : "medium"}
+                            style={styles.tabText}>
+                            {t("home.starredPlaylists")}
+                        </ThemeText>
+                        <ThemeText
+                            fontColor="textSecondary"
+                            fontSize="subTitle"
+                            accessible={false}
+                            style={styles.tabText}>
+                            {" "}
                         ({staredSheets.length})
-                    </ThemeText>
-                </TouchableWithoutFeedback>
+                        </ThemeText>
+                    </Pressable>
+                </View>
                 <View style={styles.more}>
                     <IconButton
                         name="plus"
@@ -210,23 +210,34 @@ const styles = StyleSheet.create({
     subTitleContainer: {
         paddingHorizontal: rpx(28),
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
         marginBottom: rpx(18),
     },
-    subTitleLeft: {
+    segmented: {
         flexDirection: "row",
+        minHeight: rpx(66),
+        padding: rpx(5),
+        borderRadius: rpx(24),
     },
     tabContainer: {
         flexDirection: "row",
-        marginRight: rpx(28),
+        paddingHorizontal: rpx(17),
+        borderRadius: rpx(19),
+        alignItems: "center",
     },
 
     tabText: {
-        lineHeight: rpx(68),
+        lineHeight: rpx(48),
     },
-    selectTabText: {
-        borderBottomWidth: rpx(5),
-        fontWeight: "bold",
+    selectTab: {
+        shadowColor: "#000",
+        shadowOpacity: 0.10,
+        shadowRadius: rpx(8),
+        shadowOffset: { width: 0, height: rpx(3) },
+        elevation: 2,
+    },
+    tabPressed: {
+        opacity: 0.72,
     },
     more: {
         height: rpx(64),

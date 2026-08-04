@@ -8,7 +8,7 @@ import { useCurrentMusic } from "@/core/trackPlayer";
 import globalStyle from "@/constants/globalStyle";
 import Operations from "./operations";
 import { showPanel } from "@/components/panels/usePanel.ts";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 
 interface IProps {
     onTurnPageClick?: () => void;
@@ -23,9 +23,9 @@ export default function AlbumCover(props: IProps) {
     const artworkStyle = useMemo(() => {
         if (orientation === "vertical") {
             return {
-                width: rpx(500),
-                height: rpx(500),
-                borderRadius: rpx(38),
+                width: rpx(510),
+                height: rpx(510),
+                borderRadius: rpx(42),
             };
         } else {
             return {
@@ -58,9 +58,13 @@ export default function AlbumCover(props: IProps) {
         <>
             <GestureDetector gesture={combineGesture}>
                 <Animated.View
-                    entering={ZoomIn.duration(480).springify()}
+                    entering={ZoomIn.duration(520).springify().damping(18)}
                     style={[globalStyle.fullCenter, styles.coverStage]}>
-                    <Animated.View entering={FadeIn.duration(620)} style={styles.shadow}>
+                    <Animated.View
+                        key={`${musicItem?.platform ?? "local"}-${musicItem?.id ?? musicItem?.title ?? "empty"}`}
+                        entering={FadeIn.duration(520)}
+                        exiting={FadeOut.duration(180)}
+                        style={styles.shadow}>
                         <FastImage
                             style={artworkStyle}
                             source={musicItem?.artwork}

@@ -1,5 +1,5 @@
 {
-  "name": "MusicFree",
+  "name": "echomusic",
   "version": "0.6.2",
   "private": true,
   "license": "AGPL",
@@ -130,6 +130,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maotoumao/MusicFree.git"
+    "url": "git+https://github.com/Panini235/EchoMusic.git"
   }
 }

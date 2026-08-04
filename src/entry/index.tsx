@@ -34,7 +34,7 @@ export default function Pages() {
     return (
         <ErrorBoundary>
             <BootstrapComponent />
-            <ReducedMotionConfig mode={ReduceMotion.Never} />
+            <ReducedMotionConfig mode={ReduceMotion.System} />
             <GestureHandlerRootView style={globalStyle.flex1}>
                 <SafeAreaProvider>
                     <NavigationContainer theme={theme}>
@@ -51,6 +51,7 @@ export default function Pages() {
                                     key={route.path}
                                     name={route.path}
                                     component={route.component}
+                                    options={route.options}
                                 />
                             ))}
                         </Stack.Navigator>                        

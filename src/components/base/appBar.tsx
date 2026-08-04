@@ -74,8 +74,9 @@ export default function AppBar(props: IAppBarProps) {
     const colors = useColors();
     const navigation = useNavigation();
 
-    const bgColor = color(colors.appBar ?? colors.primary).toString();
+    const bgColor = color(colors.appBar ?? colors.primary).alpha(0.94).toString();
     const contentColor = _color ?? colors.appBarText;
+    const buttonBackground = color(contentColor).alpha(0.07).toString();
 
     const [showMenu, setShowMenu] = useState(false);
     const [menuIconLayout, setMenuIconLayout] =
@@ -109,7 +110,11 @@ export default function AppBar(props: IAppBarProps) {
                     name="arrow-left"
                     sizeType="normal"
                     color={contentColor}
-                    style={globalStyle.notShrink}
+                    style={[
+                        globalStyle.notShrink,
+                        styles.navButton,
+                        { backgroundColor: buttonBackground },
+                    ]}
                     onPress={
                         onBackPress ||
                         (() => {
@@ -142,7 +147,12 @@ export default function AppBar(props: IAppBarProps) {
                         name={action.icon}
                         sizeType="normal"
                         color={contentColor}
-                        style={[globalStyle.notShrink, styles.rightButton]}
+                        style={[
+                            globalStyle.notShrink,
+                            styles.navButton,
+                            styles.rightButton,
+                            { backgroundColor: buttonBackground },
+                        ]}
                         onPress={action.onPress}
                     />
                 ))}
@@ -155,7 +165,12 @@ export default function AppBar(props: IAppBarProps) {
                             setMenuIconLayout(evt.nativeEvent.layout);
                         }}
                         color={contentColor}
-                        style={[globalStyle.notShrink, styles.rightButton]}
+                        style={[
+                            globalStyle.notShrink,
+                            styles.navButton,
+                            styles.rightButton,
+                            { backgroundColor: buttonBackground },
+                        ]}
                         onPress={() => {
                             setShowMenu(true);
                         }}
@@ -196,7 +211,9 @@ export default function AppBar(props: IAppBarProps) {
                         pointerEvents={showMenu ? "auto" : "none"}
                         style={[
                             {
-                                backgroundColor: colors.background,
+                                backgroundColor: color(colors.backdrop)
+                                    .alpha(0.97)
+                                    .toString(),
                                 right: rpx(24),
                                 top:
                                     (menuIconLayout?.y ?? 0) +
@@ -239,7 +256,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         zIndex: 10000,
-        height: rpx(88),
+        height: rpx(104),
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: rpx(24),
@@ -249,6 +266,11 @@ const styles = StyleSheet.create({
         flexBasis: 0,
         alignItems: "center",
         paddingHorizontal: rpx(24),
+    },
+    navButton: {
+        width: rpx(68),
+        height: rpx(68),
+        borderRadius: rpx(34),
     },
     rightButton: {
         marginLeft: rpx(28),
@@ -272,7 +294,7 @@ const styles = StyleSheet.create({
     menu: {
         width: rpx(340),
         maxHeight: rpx(600),
-        borderRadius: rpx(8),
+        borderRadius: rpx(22),
         zIndex: 10011,
         position: "absolute",
         opacity: 0,

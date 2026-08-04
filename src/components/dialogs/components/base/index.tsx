@@ -22,6 +22,7 @@ import Divider from "@/components/base/divider";
 import { fontSizeConst } from "@/constants/uiConst";
 import { ScrollView } from "react-native-gesture-handler";
 import useOrientation from "@/hooks/useOrientation.ts";
+import Color from "color";
 
 interface IDialogProps {
     onDismiss?: () => void;
@@ -105,7 +106,10 @@ function Dialog(props: IDialogProps) {
                     containerStyle,
                     scaleAnimationStyle,
                     {
-                        backgroundColor: colors.backdrop,
+                        backgroundColor: Color(colors.backdrop)
+                            .alpha(0.97)
+                            .toString(),
+                        borderColor: Color(colors.text).alpha(0.10).toString(),
                         shadowColor: colors.shadow,
                     },
                 ]}>
@@ -256,7 +260,7 @@ function BottomButton(props: {
 
 const styles = StyleSheet.create({
     bottomBtn: {
-        borderRadius: rpx(8),
+        borderRadius: rpx(22),
         flex: 1,
         flexShrink: 0,
         justifyContent: "center",
@@ -286,16 +290,17 @@ const styles = StyleSheet.create({
         position: "absolute",
         width: "80%",
         zIndex: 16310,
-        borderRadius: rpx(16),
+        borderRadius: rpx(30),
+        borderWidth: StyleSheet.hairlineWidth,
         backgroundColor: "red",
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
+        shadowOpacity: 0.28,
+        shadowRadius: rpx(24),
 
-        elevation: 5,
+        elevation: 14,
     },
 
     defaultFontStyle: {

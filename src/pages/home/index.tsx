@@ -13,6 +13,9 @@ import Theme from "@/core/theme";
 import HomeBody from "./components/homeBody";
 import HomeBodyHorizontal from "./components/homeBodyHorizontal";
 import useOrientation from "@/hooks/useOrientation";
+import { useTheme } from "@react-navigation/native";
+import Color from "color";
+import rpx from "@/utils/rpx";
 
 function Home() {
     const orientation = useOrientation();
@@ -61,12 +64,21 @@ function HomeStatusBar() {
 
 const LeftDrawer = createDrawerNavigator();
 export default function App() {
+    const { colors } = useTheme();
+
     return (
         <LeftDrawer.Navigator
             screenOptions={{
                 headerShown: false,
+                drawerType: "front",
+                swipeEdgeWidth: rpx(48),
+                overlayColor: Color(colors.text).alpha(0.34).toString(),
                 drawerStyle: {
-                    width: "80%",
+                    width: "86%",
+                    backgroundColor: "transparent",
+                    borderTopRightRadius: rpx(34),
+                    borderBottomRightRadius: rpx(34),
+                    overflow: "hidden",
                 },
             }}
             initialRouteName="HOME-MAIN"

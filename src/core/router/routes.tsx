@@ -18,6 +18,7 @@ import History from "@/pages/history";
 import SetCustomTheme from "@/pages/setCustomTheme";
 import Permissions from "@/pages/permissions";
 import { ROUTE_PATH } from "@/core/router/index.ts";
+import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 
 type ValueOf<T> = T[keyof T];
 export type RoutePaths = ValueOf<typeof ROUTE_PATH>;
@@ -25,6 +26,7 @@ export type RoutePaths = ValueOf<typeof ROUTE_PATH>;
 type IRoutes = {
   path: RoutePaths;
   component: (...args: any[]) => JSX.Element;
+  options?: NativeStackNavigationOptions;
 };
 
 
@@ -36,6 +38,10 @@ export const routes: Array<IRoutes> = [
     {
         path: ROUTE_PATH.MUSIC_DETAIL,
         component: MusicDetail,
+        options: {
+            animation: "fade_from_bottom",
+            animationDuration: 340,
+        },
     },
     {
         path: ROUTE_PATH.TOP_LIST,

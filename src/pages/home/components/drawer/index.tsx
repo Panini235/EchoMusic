@@ -1,279 +1,328 @@
-import Divider from "@/components/base/divider";
-import { IIconName } from "@/components/base/icon.tsx";
+import Icon, { IIconName } from "@/components/base/icon";
 import ListItem from "@/components/base/listItem";
 import PageBackground from "@/components/base/pageBackground";
 import ThemeText from "@/components/base/themeText";
 import { showDialog } from "@/components/dialogs/useDialog";
 import { showPanel } from "@/components/panels/usePanel";
+import { ImgAsset } from "@/constants/assetsConst";
 import { useI18N } from "@/core/i18n";
+import { usePlugins } from "@/core/pluginManager";
 import { ROUTE_PATH, useNavigate } from "@/core/router";
 import TrackPlayer from "@/core/trackPlayer";
-import { checkUpdateAndShowResult } from "@/hooks/useCheckUpdate.ts";
+import { checkUpdateAndShowResult } from "@/hooks/useCheckUpdate";
+import useColors from "@/hooks/useColors";
 import NativeUtils from "@/native/utils";
 import rpx from "@/utils/rpx";
-import { useScheduleCloseCountDown } from "@/utils/scheduleClose";
-import timeformat from "@/utils/timeformat";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
-import React, { memo } from "react";
-import { BackHandler, Platform, StyleSheet, View } from "react-native";
-import { default as DeviceInfo, default as deviceInfoModule } from "react-native-device-info";
+import Color from "color";
+import React from "react";
+import { BackHandler, Image, Platform, StyleSheet, View } from "react-native";
+import DeviceInfo from "react-native-device-info";
+import LinearGradient from "react-native-linear-gradient";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
-const ITEM_HEIGHT = rpx(108);
-
-interface ISettingOptions {
+interface IDrawerItem {
     icon: IIconName;
     title: string;
-    onPress?: () => void;
+    value?: string;
+    onPress: () => void;
 }
 
-function HomeDrawer(props: any) {
+export default function HomeDrawer(props: any) {
     const navigate = useNavigate();
-    function navigateToSetting(settingType: string) {
-        navigate(ROUTE_PATH.SETTING, {
-            type: settingType,
-        });
-    }
-
+    const colors = useColors();
+    const plugins = usePlugins();
     const { t, getSupportedLanguages, getLanguage, setLanguage } = useI18N();
 
-    const basicSetting: ISettingOptions[] = [
+    const navigateToSetting = (type: string) => {
+        navigate(ROUTE_PATH.SETTING, { type });
+    };
+
+    const libraryItems: IDrawerItem[] = [
         {
             icon: "cog-8-tooth",
             title: t("sidebar.basicSettings"),
-            onPress: () => {
-                navigateToSetting("basic");
-            },
-        }, {
+            onPress: () => navigateToSetting("basic"),
+        },
+        {
             icon: "javascript",
             title: t("sidebar.pluginManagement"),
-            onPress: () => {
-                navigateToSetting("plugin");
-            },
+            value: plugins.length ? `${plugins.length}` : undefined,
+            onPress: () => navigateToSetting("plugin"),
         },
         {
             icon: "t-shirt-outline",
             title: t("sidebar.themeSettings"),
-            onPress: () => {
-                navigateToSetting("theme");
-            },
+            onPress: () => navigateToSetting("theme"),
         },
     ];
 
-    const otherSetting: ISettingOptions[] = [
+    const utilityItems: IDrawerItem[] = [
+        {
+            icon: "alarm-outline",
+            title: t("sidebar.scheduleClose"),
+            onPress: () => showPanel("TimingClose"),
+        },
         {
             icon: "circle-stack",
             title: t("sidebar.backupAndResume"),
+            onPress: () => navigateToSetting("backup"),
+        },
+        ...(Platform.OS === "android"
+            ? [{
+                icon: "shield-keyhole-outline" as IIconName,
+                title: t("sidebar.permissionManagement"),
+                onPress: () => navigate(ROUTE_PATH.PERMISSIONS),
+            }]
+            : []),
+        {
+            icon: "language",
+            title: t("sidebar.languageSettings"),
+            value: getLanguage().name,
             onPress: () => {
-                navigateToSetting("backup");
+                showDialog("RadioDialog", {
+                    content: getSupportedLanguages().map(item => ({
+                        title: item.name,
+                        value: item.locale,
+                        label: item.name,
+                    })),
+                    title: t("sidebar.languageSettings"),
+                    onOk(value) {
+                        setLanguage(value as string);
+                    },
+                    defaultSelected: getLanguage().locale,
+                });
             },
         },
     ];
 
-    if (Platform.OS === "android") {
-        otherSetting.push({
-            icon: "shield-keyhole-outline",
-            title: t("sidebar.permissionManagement"),
-            onPress: () => {
-                navigate(ROUTE_PATH.PERMISSIONS);
-            },
-        });
-    }
-
+    const appItems: IDrawerItem[] = [
+        {
+            icon: "arrow-path",
+            title: t("sidebar.checkUpdate"),
+            value: DeviceInfo.getVersion(),
+            onPress: () => checkUpdateAndShowResult(true),
+        },
+        {
+            icon: "information-circle",
+            title: `${t("common.about")} ${DeviceInfo.getApplicationName()}`,
+            onPress: () => navigateToSetting("about"),
+        },
+    ];
 
     return (
-        <>
+        <View style={styles.screen}>
             <PageBackground />
-            <DrawerContentScrollView {...[props]} style={style.scrollWrapper}>
-                <View style={style.header}>
-                    <ThemeText fontSize="appbar" fontWeight="bold">
-                        {DeviceInfo.getApplicationName()}
-                    </ThemeText>
-                    {/* <IconButton icon={'qrcode-scan'} size={rpx(36)} /> */}
-                </View>
-                <View style={style.card}>
-                    <ListItem withHorizontalPadding heightType="smallest">
-                        <ListItem.ListItemText
-                            fontSize="subTitle"
-                            fontWeight="bold">
-                            {t("common.setting")}
-                        </ListItem.ListItemText>
-                    </ListItem>
-                    {basicSetting.map((item, index) => (
-                        <ListItem
-                            withHorizontalPadding
-                            key={"basic-setting-" + index}
-                            onPress={item.onPress}>
-                            <ListItem.ListItemIcon
-                                icon={item.icon}
-                                width={rpx(48)}
-                            />
-                            <ListItem.Content title={item.title} />
-                        </ListItem>
-                    ))}
-                </View>
-                <View style={style.card}>
-                    <ListItem withHorizontalPadding heightType="smallest">
-                        <ListItem.ListItemText
-                            fontSize="subTitle"
-                            fontWeight="bold">
-                            {t("common.other")}
-                        </ListItem.ListItemText>
-                    </ListItem>
-                    <CountDownItem />
-                    {otherSetting.map((item, index) => (
-                        <ListItem
-                            withHorizontalPadding
-                            key={"other-setting-" + index}
-                            onPress={item.onPress}>
-                            <ListItem.ListItemIcon
-                                icon={item.icon}
-                                width={rpx(48)}
-                            />
-                            <ListItem.Content title={item.title} />
-                        </ListItem>
-                    ))}
-                    <ListItem withHorizontalPadding key='language' onPress={() => {
-                        showDialog("RadioDialog", {
-                            "content": getSupportedLanguages().map(item => ({
-                                title: item.name,
-                                value: item.locale,
-                                label: item.name,
-                            })),
-                            title: t("sidebar.languageSettings"),
-                            onOk(value) {
-                                setLanguage(value as string);
-                            },
-                            defaultSelected: getLanguage().locale,
-                        });
-                    }}>
-                        <ListItem.ListItemIcon icon='language' width={rpx(48)} />
-                        <ListItem.Content title={t("sidebar.languageSettings")} />
-                        <ListItem.ListItemText fontSize='subTitle' position='right'>{getLanguage().name}</ListItem.ListItemText>
-                    </ListItem>
-                </View>
+            <DrawerContentScrollView
+                {...props}
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}>
+                <Animated.View entering={FadeInDown.duration(360).springify()}>
+                    <LinearGradient
+                        colors={["#F3B861", "#F08359", "#E65F58"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.brandCard}>
+                        <View style={styles.brandGlow} />
+                        <Image source={ImgAsset.logo} style={styles.logo} />
+                        <View style={styles.brandCopy}>
+                            <ThemeText color="#1B1714" fontSize="title" fontWeight="bold">
+                                {DeviceInfo.getApplicationName()}
+                            </ThemeText>
+                            <ThemeText color="rgba(27,23,20,0.68)" fontSize="description">
+                                {t("home.brandTagline")}
+                            </ThemeText>
+                        </View>
+                        <View style={styles.sourceBadge}>
+                            <View style={styles.sourceDot} />
+                            <ThemeText color="#1B1714" fontSize="description">
+                                {plugins.length ? t("home.sourceConnected", { count: plugins.length }) : t("home.pluginCompatible")}
+                            </ThemeText>
+                        </View>
+                    </LinearGradient>
+                </Animated.View>
 
-                <View style={style.card}>
-                    <ListItem withHorizontalPadding heightType="smallest">
-                        <ListItem.ListItemText
-                            fontSize="subTitle"
-                            fontWeight="bold">
-                            {t("common.software")}
-                        </ListItem.ListItemText>
-                    </ListItem>
+                <DrawerSection delay={70} title={t("common.setting")} items={libraryItems} />
+                <DrawerSection delay={120} title={t("common.other")} items={utilityItems} />
+                <DrawerSection delay={170} title={t("common.software")} items={appItems} />
 
-                    <ListItem
-                        withHorizontalPadding
-                        key={"update"}
-                        onPress={() => {
-                            checkUpdateAndShowResult(true);
-                        }}>
-                        <ListItem.ListItemIcon
-                            icon={"arrow-path"}
-                            width={rpx(48)}
-                        />
-                        <ListItem.Content title={t("sidebar.checkUpdate")} />
+                <Animated.View
+                    entering={FadeInDown.delay(210).duration(360)}
+                    style={[
+                        styles.exitRow,
+                        { borderColor: Color(colors.text).alpha(0.08).toString() },
+                    ]}>
+                    <ExitButton
+                        icon="home-outline"
+                        title={t("sidebar.backToDesktop")}
+                        onPress={() => BackHandler.exitApp()}
+                    />
+                    <View style={[styles.exitDivider, { backgroundColor: colors.divider }]} />
+                    <ExitButton
+                        icon="power-outline"
+                        title={t("sidebar.exitApp")}
+                        onPress={async () => {
+                            await TrackPlayer.reset();
+                            NativeUtils.exitApp();
+                        }}
+                    />
+                </Animated.View>
+            </DrawerContentScrollView>
+        </View>
+    );
+}
+
+function DrawerSection(props: { title: string; items: IDrawerItem[]; delay: number }) {
+    const colors = useColors();
+
+    return (
+        <Animated.View
+            entering={FadeInDown.delay(props.delay).duration(360)}
+            style={[
+                styles.section,
+                {
+                    backgroundColor: Color(colors.card).alpha(0.90).toString(),
+                    borderColor: Color(colors.text).alpha(0.07).toString(),
+                },
+            ]}>
+            <ThemeText
+                fontSize="description"
+                fontColor="textSecondary"
+                fontWeight="semibold"
+                style={styles.sectionTitle}>
+                {props.title}
+            </ThemeText>
+            {props.items.map(item => (
+                <ListItem
+                    key={item.title}
+                    heightType="small"
+                    withHorizontalPadding
+                    onPress={item.onPress}>
+                    <ListItem.ListItemIcon
+                        icon={item.icon}
+                        iconSize={rpx(34)}
+                        containerStyle={[
+                            styles.iconWell,
+                            { backgroundColor: Color(colors.primary).alpha(0.13).toString() },
+                        ]}
+                        color={colors.primary}
+                    />
+                    <ListItem.Content title={item.title} />
+                    {item.value ? (
                         <ListItem.ListItemText
                             position="right"
-                            fontSize="subTitle">
-                            {`${t("sidebar.currentVersion")}${deviceInfoModule.getVersion()}`}
+                            fontSize="description"
+                            fontColor="textSecondary">
+                            {item.value}
                         </ListItem.ListItemText>
-                    </ListItem>
-                    <ListItem
-                        withHorizontalPadding
-                        key={"about"}
-                        onPress={() => {
-                            navigateToSetting("about");
-                        }}>
-                        <ListItem.ListItemIcon
-                            icon={"information-circle"}
-                            width={rpx(48)}
-                        />
-                        <ListItem.Content
-                            title={`${t("common.about")} ${deviceInfoModule.getApplicationName()}`}
-                        />
-                    </ListItem>
-                </View>
-
-                <Divider />
-                <ListItem
-                    withHorizontalPadding
-                    onPress={() => {
-                        // 仅安卓生效
-                        BackHandler.exitApp();
-                    }}>
-                    <ListItem.ListItemIcon
-                        icon={"home-outline"}
-                        width={rpx(48)}
-                    />
-                    <ListItem.Content title={t("sidebar.backToDesktop")} />
+                    ) : null}
                 </ListItem>
-                <ListItem
-                    withHorizontalPadding
-                    onPress={async () => {
-                        await TrackPlayer.reset();
-                        NativeUtils.exitApp();
-                    }}>
-                    <ListItem.ListItemIcon
-                        icon={"power-outline"}
-                        width={rpx(48)}
-                    />
-                    <ListItem.Content title={t("sidebar.exitApp")} />
-                </ListItem>
-            </DrawerContentScrollView>
-        </>
+            ))}
+        </Animated.View>
     );
 }
 
-export default memo(HomeDrawer, () => true);
-
-const style = StyleSheet.create({
-    wrapper: {
-        flex: 1,
-        backgroundColor: "#999999",
-    },
-    scrollWrapper: {
-        paddingTop: rpx(12),
-    },
-
-    header: {
-        height: rpx(120),
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginLeft: rpx(24),
-    },
-    card: {
-        marginBottom: rpx(24),
-    },
-    cardContent: {
-        paddingHorizontal: 0,
-    },
-
-    /** 倒计时 */
-    countDownText: {
-        height: ITEM_HEIGHT,
-        textAlignVertical: "center",
-    },
-});
-
-function _CountDownItem() {
-    const countDown = useScheduleCloseCountDown();
-    const { t } = useI18N();
-
+function ExitButton(props: { icon: IIconName; title: string; onPress: () => void }) {
+    const colors = useColors();
     return (
-        <ListItem
-            withHorizontalPadding
-            onPress={() => {
-                showPanel("TimingClose");
-            }}>
-            <ListItem.ListItemIcon icon="alarm-outline" width={rpx(48)} />
-            <ListItem.Content title={t("sidebar.scheduleClose")} />
-            <ListItem.ListItemText position="right" fontSize="subTitle">
-                {countDown ? timeformat(countDown) : ""}
-            </ListItem.ListItemText>
-        </ListItem>
+        <View style={styles.exitItem}>
+            <Icon name={props.icon} size={rpx(34)} color={colors.textSecondary} onPress={props.onPress} />
+            <ThemeText fontSize="description" fontColor="textSecondary" style={styles.exitText} onPress={props.onPress}>
+                {props.title}
+            </ThemeText>
+        </View>
     );
 }
 
-const CountDownItem = memo(_CountDownItem, () => true);
+const styles = StyleSheet.create({
+    screen: { flex: 1 },
+    scroll: { flex: 1 },
+    scrollContent: {
+        paddingHorizontal: rpx(22),
+        paddingTop: rpx(18),
+        paddingBottom: rpx(40),
+    },
+    brandCard: {
+        minHeight: rpx(250),
+        padding: rpx(24),
+        borderRadius: rpx(32),
+        overflow: "hidden",
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+    },
+    brandGlow: {
+        position: "absolute",
+        width: rpx(260),
+        height: rpx(260),
+        borderRadius: rpx(130),
+        right: rpx(-70),
+        top: rpx(-100),
+        backgroundColor: "rgba(255,255,255,0.22)",
+    },
+    logo: {
+        width: rpx(92),
+        height: rpx(92),
+        borderRadius: rpx(24),
+    },
+    brandCopy: {
+        flex: 1,
+        marginLeft: rpx(20),
+        gap: rpx(5),
+    },
+    sourceBadge: {
+        minHeight: rpx(48),
+        marginTop: rpx(20),
+        paddingHorizontal: rpx(16),
+        borderRadius: rpx(24),
+        backgroundColor: "rgba(255,255,255,0.36)",
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    sourceDot: {
+        width: rpx(11),
+        height: rpx(11),
+        marginRight: rpx(10),
+        borderRadius: rpx(6),
+        backgroundColor: "#275D46",
+    },
+    section: {
+        marginTop: rpx(18),
+        paddingVertical: rpx(10),
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: "hidden",
+    },
+    sectionTitle: {
+        paddingHorizontal: rpx(24),
+        paddingTop: rpx(12),
+        paddingBottom: rpx(7),
+        letterSpacing: 0.5,
+    },
+    iconWell: {
+        width: rpx(58),
+        height: rpx(58),
+        borderRadius: rpx(18),
+        marginRight: rpx(18),
+    },
+    exitRow: {
+        minHeight: rpx(84),
+        marginTop: rpx(20),
+        borderTopWidth: StyleSheet.hairlineWidth,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    exitItem: {
+        flex: 1,
+        height: rpx(72),
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    exitDivider: {
+        width: StyleSheet.hairlineWidth,
+        height: rpx(34),
+    },
+    exitText: { marginLeft: rpx(10) },
+});

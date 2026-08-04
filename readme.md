@@ -1,19 +1,29 @@
 # EchoMusic · 畅听
 
-一个美观、低负担、无广告的插件化 Android 音乐播放器。界面以 Apple Music
-的信息层级和 Claude 的温暖克制为参考，完整保留 MusicFree 插件兼容能力。
+一个美观、低负担、无广告的插件化 Android 音乐播放器。界面借鉴 Apple Music
+与 Spotify 的移动端信息层级，并加入克制的暖色视觉、轻量动效与局部半透明材质；
+完整保留 MusicFree 插件兼容能力。
 
 [![Android CI](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml/badge.svg)](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml)
 
-> 本项目基于 [maotoumao/MusicFree](https://github.com/maotoumao/MusicFree)
-> 按 AGPL-3.0 继续开源。应用不内置任何平台音源；Bilibili、抖音、网易云、
-> QQ 音乐、喜马拉雅等服务需要用户自行安装合法来源的 MusicFree 插件。
+> [!IMPORTANT]
+> **版权与上游说明：** EchoMusic 是基于
+> [maotoumao/MusicFree](https://github.com/maotoumao/MusicFree) 的衍生项目，
+> 播放器内核、插件协议及大量基础功能来自原项目与其贡献者。本项目依照
+> **AGPL-3.0** 继续开源，并保留完整提交历史与代码出处。EchoMusic 的名称、
+> 图标与重构界面用于区分本衍生版本，不代表上游作者为本项目背书。
+>
+> 应用不内置任何平台音源；Bilibili、抖音、网易云、QQ 音乐、喜马拉雅等服务
+> 需要用户自行安装合法来源的兼容插件，并自行确保内容访问符合版权、服务条款
+> 与所在地法律法规。
 
 ## EchoMusic 构建
 
-推送到 `main`、`agent/**` 分支或提交 Pull Request 后，GitHub Actions 会自动
-完成 TypeScript 检查、测试和 Android Debug APK 构建。构建成功后可在对应的
-Actions 运行页面下载 `EchoMusic-debug-*` 产物。本地不要求安装 Android SDK。
+推送到 `main`、`agent/**` 分支、创建任意 Tag、提交 Pull Request，或在 Actions
+页面手动触发后，GitHub Actions 会自动完成 TypeScript 检查、测试和 Android
+Release APK 构建。构建成功后可在对应的 Actions 运行页面下载
+`EchoMusic-standalone-*` 产物；该 APK 已包含 JS/Hermes 包，可直接安装运行，
+不依赖 Metro。本地不要求安装 Android SDK。
 
 ---
 

@@ -25,7 +25,14 @@ export default function Bottom() {
 
 const style = StyleSheet.create({
     wrapper: {
-        width: "100%",
-        height: rpx(240),
+        height: rpx(232),
+        marginHorizontal: rpx(20),
+        marginBottom: rpx(14),
+        paddingTop: rpx(22),
+        borderRadius: rpx(36),
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "rgba(255,255,255,0.14)",
+        backgroundColor: "rgba(255,255,255,0.09)",
+        overflow: "hidden",
     },
 });

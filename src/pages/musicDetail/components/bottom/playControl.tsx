@@ -9,6 +9,13 @@ import TrackPlayer, { useMusicState, useRepeatMode } from "@/core/trackPlayer";
 import useOrientation from "@/hooks/useOrientation";
 import delay from "@/utils/delay";
 import { musicIsPaused } from "@/utils/trackUtils";
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from "react-native-reanimated";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function () {
     const repeatMode = useRepeatMode();
@@ -42,25 +49,16 @@ export default function () {
                         TrackPlayer.skipToPrevious();
                     }}
                 />
-                <Pressable
-                    accessibilityRole="button"
-                    style={({ pressed }) => [
-                        style.playButton,
-                        pressed ? style.playButtonPressed : null,
-                    ]}
+                <AnimatedPlayButton
+                    paused={musicIsPaused(musicState)}
                     onPress={() => {
                         if (musicIsPaused(musicState)) {
                             TrackPlayer.play();
                         } else {
                             TrackPlayer.pause();
                         }
-                    }}>
-                    <Icon
-                        color={"#241F1B"}
-                        name={musicIsPaused(musicState) ? "play" : "pause"}
-                        size={rpx(66)}
-                    />
-                </Pressable>
+                    }}
+                />
                 <Icon
                     color={"white"}
                     name={"skip-right"}
@@ -79,6 +77,32 @@ export default function () {
                 />
             </View>
         </>
+    );
+}
+
+function AnimatedPlayButton(props: { paused: boolean; onPress: () => void }) {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    return (
+        <AnimatedPressable
+            accessibilityRole="button"
+            style={[style.playButton, animatedStyle]}
+            onPressIn={() => {
+                scale.value = withSpring(0.90, { damping: 18, stiffness: 260 });
+            }}
+            onPressOut={() => {
+                scale.value = withSpring(1, { damping: 16, stiffness: 220 });
+            }}
+            onPress={props.onPress}>
+            <Icon
+                color="#201C19"
+                name={props.paused ? "play" : "pause"}
+                size={rpx(66)}
+            />
+        </AnimatedPressable>
     );
 }
 
@@ -106,9 +130,5 @@ const style = StyleSheet.create({
         shadowRadius: rpx(18),
         shadowOffset: { width: 0, height: rpx(8) },
         elevation: 8,
-    },
-    playButtonPressed: {
-        opacity: 0.82,
-        transform: [{ scale: 0.96 }],
     },
 });

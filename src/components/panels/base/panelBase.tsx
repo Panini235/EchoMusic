@@ -22,6 +22,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { panelInfoStore } from "../usePanel";
 import NativeUtils from "@/native/utils";
+import Color from "color";
 
 const ANIMATION_EASING: EasingFunction = Easing.out(Easing.exp);
 const ANIMATION_DURATION = 250;
@@ -169,7 +170,11 @@ export default function (props: IPanelBaseProps) {
                     height: height,
                 },
                 {
-                    backgroundColor: colors.backdrop,
+                    backgroundColor: Color(colors.backdrop)
+                        .alpha(0.97)
+                        .toString(),
+                    borderColor: Color(colors.text).alpha(0.10).toString(),
+                    shadowColor: colors.shadow,
                 },
                 panelAnimated,
             ]}>
@@ -222,6 +227,12 @@ const style = StyleSheet.create({
         right: 0,
         borderTopLeftRadius: rpx(28),
         borderTopRightRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
+        shadowOpacity: 0.22,
+        shadowRadius: rpx(28),
+        shadowOffset: { width: 0, height: rpx(-8) },
+        elevation: 16,
+        overflow: "hidden",
         zIndex: 15010,
     },
     kbContainer: {
