@@ -55,15 +55,15 @@ jobs:
       - name: Run unit tests
         run: npm test -- --runInBand --passWithNoTests
 
-      - name: Build Android debug APK
+      - name: Build standalone Android APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: EchoMusic-debug-${{ github.run_number }}
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: EchoMusic-standalone-${{ github.run_number }}
+          path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -72,5 +72,5 @@ jobs:
         run: |
           echo "### EchoMusic Android CI" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`${GITHUB_SHA::7}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Type check, tests and Android debug build run in one clean Ubuntu job." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Successful runs publish a downloadable debug APK artifact for 14 days." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Type check, tests and a standalone Android build run in one clean Ubuntu job." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Successful runs publish installable APK artifacts for 14 days." >> "$GITHUB_STEP_SUMMARY"

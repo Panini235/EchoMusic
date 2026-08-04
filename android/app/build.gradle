@@ -173,6 +173,8 @@ android {
             // see https://reactnative.dev/docs/signed-apk-android.
             if (hasReleaseSigningConfig) {
                 signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
             }
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
