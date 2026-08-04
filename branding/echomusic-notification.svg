@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <g stroke="#1B1E1F" stroke-linecap="round">
+    <path d="M82 116V140" stroke-width="9"/>
+    <path d="M94 102V154" stroke-width="9"/>
+    <path d="M106 88V168" stroke-width="9"/>
+    <path d="M118 74V182" stroke-width="9"/>
+    <path d="M128 64V192" stroke-width="9"/>
+    <path d="M138 74V182" stroke-width="9"/>
+    <path d="M150 88V168" stroke-width="9"/>
+    <path d="M162 102V154" stroke-width="9"/>
+    <path d="M174 116V140" stroke-width="9"/>
+    <path d="M42 128C42 88 84 88 128 128C172 168 214 168 214 128C214 88 172 88 128 128C84 168 42 168 42 128Z" stroke-width="20" stroke-linejoin="round"/>
+  </g>
+</svg>

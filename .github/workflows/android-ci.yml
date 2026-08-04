@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   validate-and-build:
-    name: Validate and build debug APK
+    name: Validate and build standalone APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
