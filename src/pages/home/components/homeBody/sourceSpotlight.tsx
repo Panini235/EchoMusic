@@ -3,177 +3,134 @@ import ThemeText from "@/components/base/themeText";
 import { useI18N } from "@/core/i18n";
 import { usePlugins } from "@/core/pluginManager";
 import { ROUTE_PATH, useNavigate } from "@/core/router";
+import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
+import Color from "color";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import LinearGradient from "react-native-linear-gradient";
-
-const SOURCE_NAMES = ["Bilibili", "抖音", "网易云", "QQ 音乐", "喜马拉雅"];
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function SourceSpotlight() {
     const plugins = usePlugins();
     const navigate = useNavigate();
+    const colors = useColors();
     const { t } = useI18N();
     const hasPlugin = plugins.length > 0;
 
+    const onPress = () => {
+        if (hasPlugin) {
+            navigate(ROUTE_PATH.SEARCH_PAGE);
+        } else {
+            navigate(ROUTE_PATH.SETTING, { type: "plugin" });
+        }
+    };
+
     return (
-        <Animated.View entering={FadeInDown.duration(420).springify()}>
-            <LinearGradient
-                colors={["#CC6B4C", "#E38B67", "#E5A071"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.card}>
-                <View style={styles.glowOne} />
-                <View style={styles.glowTwo} />
-                <View style={styles.statusRow}>
-                    <View style={styles.statusPill}>
-                        <View style={styles.statusDot} />
-                        <ThemeText color="#FFF8F2" fontSize="description">
+        <Animated.View entering={FadeInDown.duration(320)}>
+            <Pressable
+                accessibilityRole="button"
+                onPress={onPress}
+                style={({ pressed }) => [
+                    styles.card,
+                    {
+                        backgroundColor: Color(colors.card).alpha(0.84).toString(),
+                        borderColor: Color(colors.text).alpha(0.07).toString(),
+                    },
+                    pressed ? styles.pressed : null,
+                ]}>
+                <LinearGradient
+                    colors={["#F1BB68", "#EF7F59", "#E7645A"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.sourceIcon}>
+                    <Icon
+                        name={hasPlugin ? "musical-note" : "javascript"}
+                        size={rpx(34)}
+                        color="#1B1714"
+                    />
+                </LinearGradient>
+                <View style={styles.copy}>
+                    <ThemeText fontSize="subTitle" fontWeight="semibold" numberOfLines={1}>
+                        {hasPlugin ? t("home.searchAllSources") : t("home.addSource")}
+                    </ThemeText>
+                    <View style={styles.statusRow}>
+                        <View
+                            style={[
+                                styles.statusDot,
+                                hasPlugin
+                                    ? styles.statusDotConnected
+                                    : styles.statusDotDisconnected,
+                            ]}
+                        />
+                        <ThemeText fontSize="description" fontColor="textSecondary" numberOfLines={1}>
                             {hasPlugin
                                 ? t("home.sourceConnected", { count: plugins.length })
                                 : t("home.pluginCompatible")}
                         </ThemeText>
                     </View>
-                    <Icon name="musical-note" size={rpx(54)} color="#FFF8F2" />
                 </View>
-                <ThemeText
-                    color="#FFFDF9"
-                    fontSize="appbar"
-                    fontWeight="bold"
-                    style={styles.title}>
-                    {t("home.heroTitle")}
-                </ThemeText>
-                <ThemeText
-                    color="rgba(255,253,249,0.78)"
-                    fontSize="subTitle"
-                    style={styles.description}>
-                    {t("home.heroDescription")}
-                </ThemeText>
-                <View style={styles.sourceRow}>
-                    {SOURCE_NAMES.map(source => (
-                        <View key={source} style={styles.sourceChip}>
-                            <ThemeText color="#FFFDF9" fontSize="description">
-                                {source}
-                            </ThemeText>
-                        </View>
-                    ))}
-                </View>
-                <Pressable
-                    accessibilityRole="button"
-                    style={({ pressed }) => [
+                <View
+                    style={[
                         styles.action,
-                        pressed ? styles.actionPressed : null,
-                    ]}
-                    onPress={() => {
-                        if (hasPlugin) {
-                            navigate(ROUTE_PATH.SEARCH_PAGE);
-                        } else {
-                            navigate(ROUTE_PATH.SETTING, { type: "plugin" });
-                        }
-                    }}>
-                    <ThemeText color="#7C3E2D" fontWeight="semibold">
-                        {hasPlugin ? t("home.searchAllSources") : t("home.addSource")}
-                    </ThemeText>
+                        { backgroundColor: Color(colors.text).alpha(0.06).toString() },
+                    ]}>
                     <Icon
                         name={hasPlugin ? "magnifying-glass" : "plus"}
-                        size={rpx(34)}
-                        color="#7C3E2D"
+                        size={rpx(32)}
+                        color={colors.text}
                     />
-                </Pressable>
-            </LinearGradient>
+                </View>
+            </Pressable>
         </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
     card: {
-        minHeight: rpx(410),
+        minHeight: rpx(112),
         marginHorizontal: rpx(28),
-        marginTop: rpx(8),
-        padding: rpx(30),
-        borderRadius: rpx(36),
-        overflow: "hidden",
-        shadowColor: "#A64C32",
-        shadowOpacity: 0.22,
-        shadowRadius: rpx(22),
-        shadowOffset: { width: 0, height: rpx(12) },
-        elevation: 8,
+        marginTop: rpx(6),
+        paddingHorizontal: rpx(18),
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: "row",
+        alignItems: "center",
     },
-    glowOne: {
-        position: "absolute",
-        top: rpx(-130),
-        right: rpx(-80),
-        width: rpx(360),
-        height: rpx(360),
-        borderRadius: rpx(180),
-        backgroundColor: "rgba(255,255,255,0.10)",
+    sourceIcon: {
+        width: rpx(68),
+        height: rpx(68),
+        borderRadius: rpx(22),
+        alignItems: "center",
+        justifyContent: "center",
     },
-    glowTwo: {
-        position: "absolute",
-        bottom: rpx(-140),
-        left: rpx(-80),
-        width: rpx(330),
-        height: rpx(330),
-        borderRadius: rpx(165),
-        backgroundColor: "rgba(114,45,29,0.10)",
+    copy: {
+        flex: 1,
+        minWidth: 0,
+        marginHorizontal: rpx(18),
+        gap: rpx(5),
     },
     statusRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-    },
-    statusPill: {
-        minHeight: rpx(52),
-        paddingHorizontal: rpx(18),
-        borderRadius: rpx(26),
-        backgroundColor: "rgba(89,39,28,0.20)",
-        flexDirection: "row",
-        alignItems: "center",
     },
     statusDot: {
-        width: rpx(12),
-        height: rpx(12),
-        marginRight: rpx(12),
-        borderRadius: rpx(6),
-        backgroundColor: "#FFF4CE",
+        width: rpx(10),
+        height: rpx(10),
+        marginRight: rpx(9),
+        borderRadius: rpx(5),
     },
-    title: {
-        maxWidth: "82%",
-        marginTop: rpx(28),
-        lineHeight: rpx(58),
-        letterSpacing: -0.6,
-    },
-    description: {
-        maxWidth: "90%",
-        marginTop: rpx(12),
-        lineHeight: rpx(40),
-    },
-    sourceRow: {
-        marginTop: rpx(22),
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: rpx(10),
-    },
-    sourceChip: {
-        paddingHorizontal: rpx(14),
-        paddingVertical: rpx(7),
-        borderRadius: rpx(18),
-        backgroundColor: "rgba(255,255,255,0.13)",
-    },
+    statusDotConnected: { backgroundColor: "#4A9B72" },
+    statusDotDisconnected: { backgroundColor: "rgba(128,128,128,0.55)" },
     action: {
-        alignSelf: "flex-start",
-        minHeight: rpx(64),
-        marginTop: rpx(24),
-        paddingHorizontal: rpx(22),
-        borderRadius: rpx(32),
-        backgroundColor: "#FFF8F2",
-        flexDirection: "row",
+        width: rpx(58),
+        height: rpx(58),
+        borderRadius: rpx(29),
         alignItems: "center",
-        gap: rpx(12),
+        justifyContent: "center",
     },
-    actionPressed: {
-        opacity: 0.82,
-        transform: [{ scale: 0.98 }],
+    pressed: {
+        opacity: 0.72,
+        transform: [{ scale: 0.985 }],
     },
 });

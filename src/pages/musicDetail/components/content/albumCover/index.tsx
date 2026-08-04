@@ -5,10 +5,10 @@ import FastImage from "@/components/base/fastImage";
 import useOrientation from "@/hooks/useOrientation";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useCurrentMusic } from "@/core/trackPlayer";
-import globalStyle from "@/constants/globalStyle";
 import Operations from "./operations";
 import { showPanel } from "@/components/panels/usePanel.ts";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 
 interface IProps {
     onTurnPageClick?: () => void;
@@ -19,22 +19,31 @@ export default function AlbumCover(props: IProps) {
 
     const musicItem = useCurrentMusic();
     const orientation = useOrientation();
+    const window = useWindowDimensions();
 
     const artworkStyle = useMemo(() => {
         if (orientation === "vertical") {
+            const size = Math.max(
+                rpx(260),
+                Math.min(rpx(510), window.width - rpx(72), window.height * 0.34),
+            );
             return {
-                width: rpx(510),
-                height: rpx(510),
+                width: size,
+                height: size,
                 borderRadius: rpx(42),
             };
         } else {
+            const size = Math.max(
+                rpx(200),
+                Math.min(rpx(260), window.height * 0.42),
+            );
             return {
-                width: rpx(260),
-                height: rpx(260),
+                width: size,
+                height: size,
                 borderRadius: rpx(26),
             };
         }
-    }, [orientation]);
+    }, [orientation, window.height, window.width]);
 
     const longPress = Gesture.LongPress()
         .onStart(() => {
@@ -56,31 +65,36 @@ export default function AlbumCover(props: IProps) {
 
     return (
         <>
-            <GestureDetector gesture={combineGesture}>
-                <Animated.View
-                    entering={ZoomIn.duration(520).springify().damping(18)}
-                    style={[globalStyle.fullCenter, styles.coverStage]}>
+            <View style={styles.coverStage} pointerEvents="box-none">
+                <GestureDetector gesture={combineGesture}>
                     <Animated.View
                         key={`${musicItem?.platform ?? "local"}-${musicItem?.id ?? musicItem?.title ?? "empty"}`}
-                        entering={FadeIn.duration(520)}
+                        entering={ZoomIn.duration(440).springify().damping(18)}
                         exiting={FadeOut.duration(180)}
                         style={styles.shadow}>
-                        <FastImage
-                            style={artworkStyle}
-                            source={musicItem?.artwork}
-                            placeholderSource={ImgAsset.albumDefault}
-                        />
+                        <Animated.View entering={FadeIn.duration(420)}>
+                            <FastImage
+                                style={artworkStyle}
+                                source={musicItem?.artwork}
+                                placeholderSource={ImgAsset.albumDefault}
+                            />
+                        </Animated.View>
                     </Animated.View>
-                </Animated.View>
-            </GestureDetector>
+                </GestureDetector>
+            </View>
             <Operations />
         </>
     );
 }
 
-const styles = {
+const styles = StyleSheet.create({
     coverStage: {
+        width: "100%",
+        flex: 1,
+        minHeight: 0,
         paddingHorizontal: rpx(28),
+        alignItems: "center",
+        justifyContent: "center",
     },
     shadow: {
         borderRadius: rpx(38),
@@ -90,4 +104,4 @@ const styles = {
         shadowOffset: { width: 0, height: rpx(22) },
         elevation: 18,
     },
-};
+});

@@ -32,9 +32,6 @@ export default function NavBar() {
                         ? `${t("musicDetail.nowPlaying")} · ${musicItem.platform}`
                         : t("musicDetail.nowPlaying")}
                 </Text>
-                <Text numberOfLines={1} style={styles.headerTitleText}>
-                    {musicItem?.title ?? "--"}
-                </Text>
             </View>
             <IconButton
                 name="share"
@@ -60,7 +57,7 @@ export default function NavBar() {
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        height: rpx(124),
+        height: rpx(100),
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -74,7 +71,7 @@ const styles = StyleSheet.create({
     },
     headerContent: {
         flex: 1,
-        height: rpx(124),
+        height: rpx(100),
         justifyContent: "center",
         alignItems: "center",
     },
@@ -85,12 +82,5 @@ const styles = StyleSheet.create({
         letterSpacing: 1.1,
         includeFontPadding: false,
         textTransform: "uppercase",
-    },
-    headerTitleText: {
-        color: "white",
-        fontWeight: fontWeightConst.semibold,
-        fontSize: fontSizeConst.subTitle,
-        marginTop: rpx(7),
-        includeFontPadding: false,
     },
 });

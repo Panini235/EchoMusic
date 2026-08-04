@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import rpx from "@/utils/rpx";
 
@@ -60,7 +60,8 @@ export default function Operations() {
             </Animated.View>
             <View style={styles.actionSurface}>
                 <HeartIcon />
-                <Pressable
+                <OperationButton
+                    label="切换音质"
                     onPress={() => {
                         if (!musicItem) {
                             return;
@@ -80,24 +81,34 @@ export default function Operations() {
                         source={ImgAsset.quality[currentQuality]}
                         style={styles.quality}
                     />
-                </Pressable>
-                <Icon
-                    name={isDownloaded ? "check-circle-outline" : "arrow-down-tray"}
-                    size={iconSizeConst.normal}
-                    color="white"
+                </OperationButton>
+                <OperationButton
+                    label={isDownloaded ? "已下载" : "下载"}
                     onPress={() => {
-                        if (musicItem && !isDownloaded) {
-                            showPanel("MusicQuality", {
-                                type: "download",
-                                musicItem,
-                                async onQualityPress(quality) {
-                                    downloader.download(musicItem, quality);
-                                },
-                            });
+                        if (!musicItem) {
+                            return;
                         }
-                    }}
-                />
-                <Pressable
+                        if (isDownloaded) {
+                            Toast.success("歌曲已在本地音乐中");
+                            return;
+                        }
+                        showPanel("MusicQuality", {
+                            type: "download",
+                            musicItem,
+                            async onQualityPress(quality) {
+                                downloader.download(musicItem, quality);
+                            },
+                        });
+                    }}>
+                    <Icon
+                        pointerEvents="none"
+                        name={isDownloaded ? "check-circle-outline" : "arrow-down-tray"}
+                        size={iconSizeConst.normal}
+                        color="white"
+                    />
+                </OperationButton>
+                <OperationButton
+                    label="播放速度"
                     onPress={() => {
                         if (!musicItem) {
                             return;
@@ -113,13 +124,13 @@ export default function Operations() {
                             },
                         });
                     }}>
-                    <Image source={ImgAsset.rate[rate!]} style={styles.quality} />
-                </Pressable>
-                <Icon
-                    name="chat-bubble-oval-left-ellipsis"
-                    size={iconSizeConst.normal}
-                    color="white"
-                    opacity={supportComment ? 1 : 0.2}
+                    <Image
+                        source={ImgAsset.rate[rate!]}
+                        style={styles.quality}
+                    />
+                </OperationButton>
+                <OperationButton
+                    label="评论"
                     onPress={() => {
                         if (!supportComment) {
                             toast.warn(i18n.t("toast.commmentNotAvaliableForCurrentMusic"));
@@ -130,12 +141,17 @@ export default function Operations() {
                                 musicItem,
                             });
                         }
-                    }}
-                />
-                <Icon
-                    name="ellipsis-vertical"
-                    size={iconSizeConst.normal}
-                    color="white"
+                    }}>
+                    <Icon
+                        pointerEvents="none"
+                        name="chat-bubble-oval-left-ellipsis"
+                        size={iconSizeConst.normal}
+                        color="white"
+                        opacity={supportComment ? 1 : 0.28}
+                    />
+                </OperationButton>
+                <OperationButton
+                    label="更多"
                     onPress={() => {
                         if (musicItem) {
                             showPanel("MusicItemOptions", {
@@ -143,37 +159,77 @@ export default function Operations() {
                                 from: ROUTE_PATH.MUSIC_DETAIL,
                             });
                         }
-                    }}
-                />
+                    }}>
+                    <Icon
+                        pointerEvents="none"
+                        name="ellipsis-vertical"
+                        size={iconSizeConst.normal}
+                        color="white"
+                    />
+                </OperationButton>
             </View>
         </View>
+    );
+}
+
+function OperationButton(props: {
+    label: string;
+    onPress: () => void;
+    children: ReactNode;
+}) {
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={props.label}
+            hitSlop={6}
+            onPress={props.onPress}
+            style={({ pressed }) => [
+                styles.operationButton,
+                pressed ? styles.operationButtonPressed : null,
+            ]}>
+            {props.children}
+        </Pressable>
     );
 }
 
 const styles = StyleSheet.create({
     wrapper: {
         width: "100%",
-        minHeight: rpx(172),
+        minHeight: rpx(164),
         marginBottom: rpx(8),
         paddingHorizontal: rpx(28),
+        zIndex: 20,
     },
     horizontalWrapper: {
         minHeight: rpx(140),
     },
     metadata: {
-        minHeight: rpx(76),
+        minHeight: rpx(70),
         justifyContent: "center",
         gap: rpx(4),
     },
     actionSurface: {
-        height: rpx(78),
+        height: rpx(82),
         borderRadius: rpx(28),
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: "rgba(255,255,255,0.15)",
         backgroundColor: "rgba(255,255,255,0.10)",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
+        paddingHorizontal: rpx(7),
+    },
+    operationButton: {
+        width: rpx(64),
+        height: rpx(64),
+        borderRadius: rpx(22),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    operationButtonPressed: {
+        opacity: 0.55,
+        backgroundColor: "rgba(255,255,255,0.10)",
+        transform: [{ scale: 0.92 }],
     },
     quality: {
         width: rpx(52),
