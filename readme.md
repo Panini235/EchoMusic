@@ -1,243 +1,150 @@
 # EchoMusic · 畅听
 
-一个美观、低负担、无广告的插件化 Android 音乐播放器。界面借鉴 Apple Music
-与 Spotify 的移动端信息层级，并加入克制的暖色视觉、轻量动效与局部半透明材质；
-完整保留 MusicFree 插件兼容能力。
+一个面向 Android 的插件化、可定制、无广告音乐播放器。
 
 [![Android CI](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml/badge.svg)](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](./LICENSE)
+[![Platform: Android](https://img.shields.io/badge/Platform-Android-3DDC84.svg)](https://www.android.com/)
 
-> [!IMPORTANT]
-> **版权与上游说明：** EchoMusic 是基于
-> [maotoumao/MusicFree](https://github.com/maotoumao/MusicFree) 的衍生项目，
-> 播放器内核、插件协议及大量基础功能来自原项目与其贡献者。本项目依照
-> **AGPL-3.0** 继续开源，并保留完整提交历史与代码出处。EchoMusic 的名称、
-> 图标与重构界面用于区分本衍生版本，不代表上游作者为本项目背书。
->
-> 应用不内置任何平台音源；Bilibili、抖音、网易云、QQ 音乐、喜马拉雅等服务
-> 需要用户自行安装合法来源的兼容插件，并自行确保内容访问符合版权、服务条款
-> 与所在地法律法规。
-
-## EchoMusic 构建
-
-推送到 `main`、`agent/**` 分支、创建任意 Tag、提交 Pull Request，或在 Actions
-页面手动触发后，GitHub Actions 会自动完成 TypeScript 检查、测试和 Android
-Release APK 构建。构建成功后可在对应的 Actions 运行页面下载
-`EchoMusic-standalone-*` 产物；该 APK 已包含 JS/Hermes 包，可直接安装运行，
-不依赖 Metro。本地不要求安装 Android SDK。
-
----
-
-## 上游项目说明
-
-**中文** | [English](./readme-en.md)
-
-![GitHub Repo stars](https://img.shields.io/github/stars/maotoumao/MusicFree) 
-![GitHub forks](https://img.shields.io/github/forks/maotoumao/MusicFree)
-![star](https://gitcode.com/maotoumao/MusicFree/star/badge.svg)
-
-![GitHub License](https://img.shields.io/github/license/maotoumao/MusicFree)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/maotoumao/MusicFree/total)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/maotoumao/MusicFree)
-![GitHub package.json version](https://img.shields.io/github/package-json/v/maotoumao/MusicFree)
-
-<a href="https://trendshift.io/repositories/1028" target="_blank"><img src="https://trendshift.io/api/badge/repositories/1028" alt="maotoumao%2FMusicFree | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
-## 简介
-
-一个插件化、定制化、无广告的免费音乐播放器，目前只支持 Android 和 Harmony OS。
-
-> **桌面版来啦：<https://github.com/maotoumao/MusicFreeDesktop>**
-
-如果需要了解后续进展可以关注公众号↓；如果有问题可以在 issue 区或者公众号直接留言反馈。
-
-![微信公众号](./src/assets/imgs/wechat_channel.jpg)
-
-软件下载方式、插件使用说明、插件开发文档可去站点 [https://musicfree.catcat.work](https://musicfree.catcat.work) 查看。
+EchoMusic 在保留 MusicFree 插件生态与播放器能力的基础上，重新设计了首页、
+侧边栏、播放页和常用交互。项目更关注舒适的视觉层级、自然的动画、克制的
+毛玻璃效果以及中低端设备上的运行体验。
 
 > [!NOTE]
-> - 如果你在其他的平台看到收费版/无广告版/破解版，都是假的，本来就是开源项目，**遇到收费版请直接举报**；
-> - 软件首先是自用，顺带分享出来希望可以帮助到有需要的人；是业余作品，会尽量保持维护，不过每天能写的时间有限（半小时左右），目测会有很长一段时间处于不稳定测试版本，且更新频率不定，请谨慎使用；
-> - 软件的第三方插件、及其所产生的数据与本软件无关，请合理合法使用，可能产生的版权数据请及时删除。
-> - **请不要以 VIP/破解版为噱头进行宣传**，示例仓库基于互联网公开接口封装，并**过滤掉所有 VIP、试听、付费歌曲**，且示例仓库以后也**不会提供具备破解功能的插件**；
-> - 本软件的相关信息**只会主动投放在 Git 仓库以及公众号“一只猫头猫”中**，如果希望写文章介绍本软件请自便，但还烦请**如实陈述，涉及到示例仓库请给插件源打个码**，不要给软件增加一些不实的功能（尽管我也想有）；描述冲突的地方以本仓库为准。
+> EchoMusic 仍在持续开发。升级前建议备份歌单和配置；不同插件的可用性取决于
+> 插件自身及对应第三方服务，并不由 EchoMusic 保证。
 
+## 主要特色
 
-## 项目使用约定：
-本项目基于 AGPL 3.0 协议开源，使用此项目时请遵守开源协议。  
-除此外，希望你在使用代码时已经了解以下额外说明：
+- **兼容 MusicFree 插件**：支持通过插件完成音乐、专辑和作者搜索，以及歌词、
+  歌单等内容的获取。
+- **现代化界面**：重新设计首页、抽屉导航、列表、设置页与播放页，兼顾浅色、
+  深色主题和不同尺寸的 Android 屏幕。
+- **轻量动效**：使用短时、低干扰的过渡动画，并遵循系统的“减少动态效果”设置。
+- **克制的毛玻璃效果**：仅在关键层级使用半透明和模糊材质，避免持续高负载渲染。
+- **本地音乐管理**：支持本地歌曲、歌单、播放历史、歌词和下载管理。
+- **应用本身无广告**：不植入广告，也不内置任何第三方平台音源。
+- **数据以本地存储为主**：播放器配置和歌单保存在设备本地；安装的插件可能根据
+  其实现访问网络，请在安装前自行检查来源与代码。
 
-1. 打包、二次分发 **请保留代码出处**：https://github.com/maotoumao/MusicFree
-2. 请不要用于商业用途，合法合规使用代码；
-3. 如果开源协议变更，将在此 Github 仓库更新，不另行通知。
+## 下载与安装
 
-> [!CAUTION]
-> ### 👎 Hall of Shame
-> 👎 小米/华为/vivo等<ins>应用市场的 MusicFree </ins>和本软件无关，**是套用本软件名称和 Logo 的广告软件**。
->
-> 👎 速悦音乐基于本软件二次开发，改动点仅仅是内置插件、修改一些 UI 以及引流，**并未遵守本项目的开源协议，且拒绝沟通**。
+EchoMusic 当前通过 GitHub Actions 提供 Android APK，不要求普通用户自行安装
+Android SDK。
 
----
+1. 打开 [Android CI](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml)。
+2. 选择带有绿色对勾的最新构建。
+3. 在运行页面底部下载 `EchoMusic-standalone-*` 构建产物。
+4. 解压下载的 ZIP 文件并安装其中的 APK。
 
-## 特性
+GitHub Actions 构建产物保留 14 天。安装 APK 时，Android 可能要求授权当前浏览器
+或文件管理器“安装未知应用”。请确认下载来源确实为本仓库后再继续安装。
 
-- 插件化：本软件仅仅是一个播放器，本身**并不集成**任何平台的任何音源，所有的搜索、播放、歌单导入等功能全部基于**插件**。这也就意味着，**只要可以在互联网上搜索到的音源，只要有对应的插件，你都可以使用本软件进行搜索、播放等功能**。关于插件的详细说明请看插件一节。
+## 插件使用
 
-- 插件支持的功能：搜索（音乐、专辑、作者）、播放、查看专辑、查看作者详细信息、导入单曲、导入歌单、获取歌词等。
+EchoMusic 只是播放器框架，**不会内置 Bilibili、抖音、网易云音乐、QQ 音乐、
+喜马拉雅等平台的音源**。你可以安装合法来源的 MusicFree 兼容插件，或者按照
+插件协议开发仅供自己使用的插件。
 
-- 定制化、无广告：本软件提供了浅色、深色模式；支持自定义背景；本软件基于 AGPL 协议开源，~~一个 star 做交易~~ 将会保持免费。
-- 隐私：所有的数据都存储在本地，本软件不会收集你的任何个人信息。
-- 歌词关联：你可以把两首歌的歌词关联起来，比如将歌曲 A 的歌词关联到歌曲 B，关联后 A、B 两首歌都将显示歌曲 B 的歌词。你也可以关联多首歌的歌词，如 A->B->C，这样 A、B、C 三首歌都将显示 C 的歌词。
+安装入口：
 
-## 插件
+1. 打开侧边栏并进入“设置”。
+2. 选择“插件设置”。
+3. 从本地文件或网络地址安装 `.js` 插件或 `.json` 插件订阅。
+4. 检查插件信息并启用需要使用的音源。
 
-### 插件简介
+插件开发请参阅
+[MusicFree 插件开发文档](https://musicfree.catcat.work/plugin/introduction.html)。
 
-插件本质上是一个满足插件协议的 commonjs 模块。插件中定义了搜索（音乐、专辑、作者）、播放、查看专辑、作者详细信息、导入歌单、获取歌词等基本函数，插件的开发者只需要关心输入输出逻辑，至于分页、缓存等全都交给 MusicFree 控制即可。本软件通过插件来完成播放器的所有功能，这样解耦的设计也可以使得本软件可以专注于做一个功能完善的播放器，我直呼小而美。
+> [!WARNING]
+> 插件可以发起网络请求并处理设备中的播放器数据。请勿安装来历不明、经过混淆
+> 且无法审查，或声称可以绕过付费、会员和版权限制的插件。
 
-插件开发文档可以参考 [这里](https://musicfree.catcat.work/plugin/introduction.html)
+## GitHub Workflow 构建
 
-需要注意的是：
+仓库的 Android 构建全部由
+[`.github/workflows/android-ci.yml`](./.github/workflows/android-ci.yml) 完成。Workflow
+会在干净的 Ubuntu 环境中依次安装依赖、执行 TypeScript 检查和测试、构建
+Release APK，并上传可独立安装的产物。
 
-- 如果你是使用第三方下载的插件，那么请自行鉴别插件的安全性（基本上看下没有奇怪的网络请求什么的就好了；自己写的最安全，*不要安装来路不明的东西*），防止恶意代码破坏。因为第三方恶意插件导致的可能的损失与本软件无关。
+| 触发方式 | 行为 |
+| --- | --- |
+| 推送到 `main` 或 `agent/**` | 自动验证并构建 APK |
+| 提交面向 `main` 的 Pull Request | 自动验证并构建 APK |
+| 推送任意 Tag | 自动验证并构建 APK |
+| Actions 页面选择 `Run workflow` | 手动验证并构建 APK |
 
-- 插件使用过程中可能会产生某些和本软件无关的版权数据，插件、以及插件产生的任何数据与本软件无关，请使用者自行斟酌，及时删除数据，本软件不提倡也不会提供任何破解行为，你可以搭建自己的离线音乐仓库使用。
+发布 Tag 示例：
 
-### 插件使用
+```bash
+git tag v0.6.2
+git push origin v0.6.2
+```
 
-下载 app 之后，只需要在侧边栏设置-插件设置中安装插件即可。支持安装本地插件和从网络安装插件（支持解析.js 文件和.json 描述文件；已经写了几个示意的插件：[指路这个仓库](https://github.com/maotoumao/MusicFreePlugins)，不过可能功能不是很完善）；
+手动构建时，进入 Android CI 页面，点击 **Run workflow** 并选择需要构建的分支。
+成功产物命名为 `EchoMusic-standalone-<运行序号>`。
 
+当前 Workflow 使用 Node.js 20、Java 17 和 Gradle 缓存。React Native/Android 的
+原生依赖下载与 Release 编译通常是最耗时的部分；首次构建或缓存未命中时可能需要
+更长时间。
 
-你可以直接点击从网络安装插件，然后输入<https://raw.gitcode.com/maotoumao/MusicFreePlugins/raw/master/plugins.json> ，点击确认即可安装。
+## 开发环境
 
-图文版详细使用说明可以参考公众号：[MusicFree 插件使用指南](https://mp.weixin.qq.com/s?__biz=MzkxOTM5MDI4MA==&mid=2247483875&idx=1&sn=aedf8bb909540634d927de7fd2b4b8b1&chksm=c1a390c4f6d419d233908bb781d418c6b9fd2ca82e9e93291e7c93b8ead3c50ca5ae39668212#rd)，或者站点： https://musicfree.catcat.work/usage/mobile/install-plugin.html
+项目基于 React Native，建议使用 Node.js 20。提交更改前至少执行：
 
-## 下载地址
+```bash
+npm install --no-audit --no-fund
+npx tsc --noEmit
+npm test -- --runInBand --passWithNoTests
+```
 
-请转到发布页查看：[指路](https://github.com/maotoumao/MusicFree/releases) (如果打不开可以把 github 换成 gitcode)，公众号回复 Musicfree 也可以。
+正式 APK 请通过仓库的 GitHub Workflow 构建，以保持构建环境和产物一致。
 
-## Q&A
+## 打包与二次分发
 
-使用时遇到的常见问题可以看这里：[MusicFree 使用 Q&A](https://musicfree.catcat.work/qa/common.html)
+> [!IMPORTANT]
+> 1. 打包、二次分发 **请保留代码出处**：
+>    [maotoumao/MusicFree](https://github.com/maotoumao/MusicFree)
+> 2. 请不要用于商业用途，合法合规使用代码。
+> 3. 如果开源协议变更，将在此 GitHub 仓库更新，不另行通知。
 
-技术交流/一起写点有意思的东西/技术向的闲聊欢迎加群：[683467814](https://jq.qq.com/?_wv=1027&k=upVpi2k3)~ （不是答疑群）
+打包、修改或二次分发时，还应当：
 
-闲聊可以到 [QQ 频道](https://pd.qq.com/s/cyxnf0jj1)~
+- 遵守 [GNU AGPL-3.0](./LICENSE) 及所使用依赖的许可证要求；
+- 保留原项目和贡献者的版权、许可证及来源说明；
+- 对外提供修改版本时，按照 AGPL-3.0 提供对应源代码和修改说明；
+- 不得暗示修改版本获得 MusicFree 或 EchoMusic 原作者的官方认可；
+- 不得捆绑来源不明、侵权或用于绕过第三方服务限制的音源插件。
 
-## WIP
+## 上游项目与致谢
 
-如果有需要讨论的新需求，可以在公众号后台留言/提issue/或者去discussion开个话题。
+EchoMusic 基于
+[maotoumao/MusicFree](https://github.com/maotoumao/MusicFree) 开发。播放器内核、
+插件协议及多项基础能力来自 MusicFree 与其贡献者；EchoMusic 在此基础上进行了
+品牌替换、界面重构、交互优化和构建流程调整。
 
-## 支持这个项目
+EchoMusic 的名称、图标和界面仅用于区分本衍生版本，不代表 MusicFree 作者或
+贡献者为本项目背书。感谢所有上游作者和开源贡献者。
 
-如果你喜欢这个项目，或者希望我可以持续维护下去，你可以通过以下任何一种方式支持我;)
+## 开源协议
 
-1. Star 这个项目，分享给你身边的人；
-2. 关注公众号👇或 b 站 [不想睡觉猫头猫](https://space.bilibili.com/12866223) 获取最新信息；
-3. 关注猫头猫的 [小红书](https://www.xiaohongshu.com/user/profile/5ce6085200000000050213a6?xhsshare=CopyLink&appuid=5ce6085200000000050213a6&apptime=1714394544)，虽然可能不会在这里更新软件相关的信息，但也算支持啦~
+本项目沿用 [GNU Affero General Public License v3.0](./LICENSE)。使用、修改或分发
+本项目代码前，请完整阅读许可证正文。仓库中引用的第三方库、字体、图标及其他资源
+可能适用各自的许可证，相关权利归原作者所有。
 
-![微信公众号](./src/assets/imgs/wechat_channel.jpg)
+## 合法使用声明
 
-感谢以下小伙伴的推荐，很意外也很惊喜 ~~~
+- 本项目仅提供播放器和插件运行能力，不提供、存储或维护任何第三方平台音源。
+- 插件、插件服务及其产生的数据由插件提供者和使用者自行负责。
+- 使用者应当遵守所在地法律法规、内容版权要求以及第三方平台的服务条款。
+- 请勿使用本项目从事侵权、破解、绕过付费限制或其他违法违规活动。
+- 本项目按现状提供，不承诺任意插件或第三方服务持续可用。
 
-来自**果核剥壳**的安利~ <https://mp.weixin.qq.com/s/F6hMbLv_a-Ty0fPA_0P0Rg>
+## 反馈与贡献
 
-来自**小棉袄**的安利~ <https://mp.weixin.qq.com/s/Fqe3o7vcTw0KDKoB-gsQfg>
+发现问题或希望改进功能，可以在
+[Issues](https://github.com/Panini235/EchoMusic/issues) 中提交反馈。提交问题时，请尽量
+附上 Android 版本、EchoMusic 构建序号、复现步骤和必要的日志；请勿公开账号凭据、
+Cookie、Token 或其他敏感信息。
 
-## ChangeLog
-
-[点击这里](./changelog.md)
-
----
-本项目仅供学习参考使用，基于 AGPL3.0 协议开源；请在符合法律法规的情况下合理使用本项目，禁止用于商业目的使用。
-
-## 应用截图
-
-**以下截图仅为 UI 样例，软件内部不提供任何音源，不代表实际使用时表现如下图。**
-#### 主界面
-
-<img src="./.imgs/main-v0.6.jpg" width="320px" alt="主界面">
-
-#### 侧边栏
-
-- 侧边栏
-
-<img src="./.imgs/sidebar-v0.6.jpg" width="320px" alt="侧边栏">
-
-- 基础设置
-
-<img src="./.imgs/basic-setting-v0.6.jpg" width="320px" alt="基础设置">
-
-- 主题设置
-
-<img src="./.imgs/theme-setting-v0.6.jpg" width="320px" alt="主题设置">
-
-#### 音乐相关
-
-- 歌单页
-
-<img src="./.imgs/song-sheet-v0.6.jpg" width="320px" alt="歌单页">
-
-- 歌单内检索
-
-<img src="./.imgs/search-in-sheet-v0.6.jpg" width="320px" alt="歌单内检索">
-
-- 播放页
-
-<img src="./.imgs/song-cover-v0.6.jpg" width="320px" alt="播放页">
-
-- 歌词页
-
-<img src="./.imgs/song-lrc-v0.6.jpg" width="320px" alt="歌词页">
-
-#### 搜索相关
-
-- 作者信息
-
-<img src="./.imgs/artist-detail-v0.6.jpg" width="320px" alt="作者信息">
-
-
-<details>
-
-
-<summary>以下是软件早期版本的 UI</summary>
-
-#### 主界面
-
-<img src="./.imgs/main.jpg" width="320px" alt="主界面">
-
-#### 侧边栏
-
-- 基础设置
-
-<img src="./.imgs/basic-setting.jpg" width="320px" alt="基础设置">
-
-- 主题设置
-
-<img src="./.imgs/theme-setting.jpg" width="320px" alt="主题设置">
-
-#### 音乐相关
-
-- 歌单页
-
-<img src="./.imgs/song-sheet.jpg" width="320px" alt="歌单页">
-
-- 歌单内检索
-
-<img src="./.imgs/search-in-sheet.jpg" width="320px" alt="歌单内检索">
-
-- 播放页
-
-<img src="./.imgs/song-cover.jpg" width="320px" alt="播放页">
-
-- 歌词页
-
-<img src="./.imgs/song-lrc.jpg" width="320px" alt="歌词页">
-
-#### 搜索相关
-
-- 作者信息
-
-<img src="./.imgs/artist-detail.jpg" width="320px" alt="作者信息">
-
-
-</details>
+版本改动记录见 [changelog.md](./changelog.md)。
