@@ -33,7 +33,6 @@ export default function Pages() {
 
     return (
         <ErrorBoundary>
-            <BootstrapComponent />
             <ReducedMotionConfig mode={ReduceMotion.System} />
             <GestureHandlerRootView style={globalStyle.flex1}>
                 <SafeAreaProvider>
@@ -62,6 +61,7 @@ export default function Pages() {
                         <PortalHost />
                     </NavigationContainer>
                 </SafeAreaProvider>
+                <BootstrapComponent />
             </GestureHandlerRootView>
         </ErrorBoundary>
     );

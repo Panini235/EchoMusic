@@ -14,6 +14,7 @@ export interface ILanguageData {
     "common.save": string; // 保存
     "common.download": string; // 下载
     "common.play": string; // 播放
+    "common.pause": string; // 暂停
     "common.delete": string; // 删除
     "common.unknownName": string; // 未知名称
     "common.default": string; // 默认
@@ -30,6 +31,7 @@ export interface ILanguageData {
     "common.confirm": string; // 确认
     "common.view": string; // 查看
     "common.open": string; // 打开
+    "common.viewAll": string; // 查看全部
     "common.username": string; // 用户名
     "common.password": string; // 密码
     "common.cover": string; // 封面
@@ -54,6 +56,10 @@ export interface ILanguageData {
     "sidebar.backToDesktop": string; // 返回桌面
     "sidebar.exitApp": string; // 退出应用
     "sidebar.languageSettings": string; // 语言设置
+    "sidebar.controlCenter": string;
+    "sidebar.sourceManagement": string;
+    "sidebar.sourceNotConfigured": string;
+    "sidebar.downloadQueue": string;
 
     // 检查更新相关
     "checkUpdate.error.latestVersion": string; // 当前已是最新版本
@@ -80,6 +86,21 @@ export interface ILanguageData {
     "home.heroDescription": string;
     "home.searchAllSources": string;
     "home.addSource": string;
+    "home.searchPlaceholder": string;
+    "home.openControlCenter.a11y": string;
+    "home.continueListening": string;
+    "home.readyToListen": string;
+    "home.startListening": string;
+    "home.startListeningDescription": string;
+    "home.recentlyPlayed": string;
+    "home.viewAllHistory": string;
+    "home.frequentPlaylists": string;
+    "home.quickAccess": string;
+    "home.library": string;
+    "home.discover": string;
+    "home.player": string;
+    "home.profile": string;
+    "startup.preparing": string;
     "musicDetail.nowPlaying": string;
 
     // 对话框相关

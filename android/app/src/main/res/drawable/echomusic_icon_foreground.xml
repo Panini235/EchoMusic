@@ -60,6 +60,7 @@
         android:strokeLineCap="round"
         android:strokeWidth="3.5" />
     <path
+        android:name="infinity"
         android:fillColor="@android:color/transparent"
         android:pathData="M18,54C18,38 36,38 54,54C72,70 90,70 90,54C90,38 72,38 54,54C36,70 18,70 18,54Z"
         android:strokeLineCap="round"

@@ -16,10 +16,11 @@ import rpx from "@/utils/rpx";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import Color from "color";
 import React from "react";
-import { BackHandler, Image, Platform, StyleSheet, View } from "react-native";
+import { BackHandler, Image, Platform, Pressable, StyleSheet, View } from "react-native";
 import DeviceInfo from "react-native-device-info";
-import LinearGradient from "react-native-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useDownloadQueue } from "@/core/downloader";
 
 interface IDrawerItem {
     icon: IIconName;
@@ -32,6 +33,7 @@ export default function HomeDrawer(props: any) {
     const navigate = useNavigate();
     const colors = useColors();
     const plugins = usePlugins();
+    const downloadQueue = useDownloadQueue();
     const { t, getSupportedLanguages, getLanguage, setLanguage } = useI18N();
 
     const navigateToSetting = (type: string) => {
@@ -40,15 +42,17 @@ export default function HomeDrawer(props: any) {
 
     const libraryItems: IDrawerItem[] = [
         {
+            icon: plugins.length ? "musical-note" : "javascript",
+            title: t("sidebar.sourceManagement"),
+            value: plugins.length
+                ? `${plugins.length}`
+                : t("sidebar.sourceNotConfigured"),
+            onPress: () => navigateToSetting("plugin"),
+        },
+        {
             icon: "cog-8-tooth",
             title: t("sidebar.basicSettings"),
             onPress: () => navigateToSetting("basic"),
-        },
-        {
-            icon: "javascript",
-            title: t("sidebar.pluginManagement"),
-            value: plugins.length ? `${plugins.length}` : undefined,
-            onPress: () => navigateToSetting("plugin"),
         },
         {
             icon: "t-shirt-outline",
@@ -58,6 +62,12 @@ export default function HomeDrawer(props: any) {
     ];
 
     const utilityItems: IDrawerItem[] = [
+        {
+            icon: "arrow-down-tray",
+            title: t("sidebar.downloadQueue"),
+            value: downloadQueue.length ? `${downloadQueue.length}` : undefined,
+            onPress: () => navigate(ROUTE_PATH.DOWNLOADING),
+        },
         {
             icon: "alarm-outline",
             title: t("sidebar.scheduleClose"),
@@ -111,39 +121,45 @@ export default function HomeDrawer(props: any) {
     ];
 
     return (
-        <View style={styles.screen}>
+        <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
             <PageBackground />
             <DrawerContentScrollView
                 {...props}
                 style={styles.scroll}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}>
-                <Animated.View entering={FadeInDown.duration(360).springify()}>
-                    <LinearGradient
-                        colors={["#F3B861", "#F08359", "#E65F58"]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.brandCard}>
-                        <View style={styles.brandGlow} />
-                        <Image source={ImgAsset.logo} style={styles.logo} />
-                        <View style={styles.brandCopy}>
-                            <ThemeText color="#1B1714" fontSize="title" fontWeight="bold">
-                                {DeviceInfo.getApplicationName()}
-                            </ThemeText>
-                            <ThemeText color="rgba(27,23,20,0.68)" fontSize="description">
-                                {t("home.brandTagline")}
-                            </ThemeText>
-                        </View>
-                        <View style={styles.sourceBadge}>
-                            <View style={styles.sourceDot} />
-                            <ThemeText color="#1B1714" fontSize="description">
-                                {plugins.length ? t("home.sourceConnected", { count: plugins.length }) : t("home.pluginCompatible")}
-                            </ThemeText>
-                        </View>
-                    </LinearGradient>
+                <Animated.View
+                    entering={FadeInDown.duration(340).springify().damping(18)}
+                    style={[
+                        styles.brandCard,
+                        {
+                            backgroundColor: Color(colors.card).alpha(0.94).toString(),
+                            borderColor: Color(colors.primary).alpha(0.18).toString(),
+                        },
+                    ]}>
+                    <Image source={ImgAsset.logo} style={styles.logo} />
+                    <View style={styles.brandCopy}>
+                        <ThemeText fontSize="title" fontWeight="bold">
+                            {DeviceInfo.getApplicationName()}
+                        </ThemeText>
+                        <ThemeText fontColor="textSecondary" fontSize="description">
+                            {t("home.brandTagline")}
+                        </ThemeText>
+                    </View>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t("sidebar.basicSettings")}
+                        hitSlop={8}
+                        onPress={() => navigateToSetting("basic")}
+                        style={[
+                            styles.headerAction,
+                            { backgroundColor: Color(colors.primary).alpha(0.12).toString() },
+                        ]}>
+                        <Icon name="cog-8-tooth" size={rpx(32)} color={colors.primary} />
+                    </Pressable>
                 </Animated.View>
 
-                <DrawerSection delay={70} title={t("common.setting")} items={libraryItems} />
+                <DrawerSection delay={70} title={t("sidebar.controlCenter")} items={libraryItems} />
                 <DrawerSection delay={120} title={t("common.other")} items={utilityItems} />
                 <DrawerSection delay={170} title={t("common.software")} items={appItems} />
 
@@ -169,7 +185,7 @@ export default function HomeDrawer(props: any) {
                     />
                 </Animated.View>
             </DrawerContentScrollView>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -226,12 +242,19 @@ function DrawerSection(props: { title: string; items: IDrawerItem[]; delay: numb
 function ExitButton(props: { icon: IIconName; title: string; onPress: () => void }) {
     const colors = useColors();
     return (
-        <View style={styles.exitItem}>
-            <Icon name={props.icon} size={rpx(34)} color={colors.textSecondary} onPress={props.onPress} />
-            <ThemeText fontSize="description" fontColor="textSecondary" style={styles.exitText} onPress={props.onPress}>
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={props.title}
+            onPress={props.onPress}
+            style={({ pressed }) => [
+                styles.exitItem,
+                pressed ? styles.exitPressed : null,
+            ]}>
+            <Icon name={props.icon} size={rpx(34)} color={colors.textSecondary} />
+            <ThemeText fontSize="description" fontColor="textSecondary" style={styles.exitText}>
                 {props.title}
             </ThemeText>
-        </View>
+        </Pressable>
     );
 }
 
@@ -240,52 +263,33 @@ const styles = StyleSheet.create({
     scroll: { flex: 1 },
     scrollContent: {
         paddingHorizontal: rpx(22),
-        paddingTop: rpx(18),
+        paddingTop: rpx(12),
         paddingBottom: rpx(40),
     },
     brandCard: {
-        minHeight: rpx(250),
-        padding: rpx(24),
-        borderRadius: rpx(32),
-        overflow: "hidden",
+        minHeight: rpx(116),
+        paddingHorizontal: rpx(18),
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",
-        flexWrap: "wrap",
-    },
-    brandGlow: {
-        position: "absolute",
-        width: rpx(260),
-        height: rpx(260),
-        borderRadius: rpx(130),
-        right: rpx(-70),
-        top: rpx(-100),
-        backgroundColor: "rgba(255,255,255,0.22)",
     },
     logo: {
-        width: rpx(92),
-        height: rpx(92),
-        borderRadius: rpx(24),
+        width: rpx(70),
+        height: rpx(70),
+        borderRadius: rpx(22),
     },
     brandCopy: {
         flex: 1,
-        marginLeft: rpx(20),
-        gap: rpx(5),
+        marginLeft: rpx(16),
+        gap: rpx(3),
     },
-    sourceBadge: {
-        minHeight: rpx(48),
-        marginTop: rpx(20),
-        paddingHorizontal: rpx(16),
-        borderRadius: rpx(24),
-        backgroundColor: "rgba(255,255,255,0.36)",
-        flexDirection: "row",
+    headerAction: {
+        width: rpx(56),
+        height: rpx(56),
+        borderRadius: rpx(20),
         alignItems: "center",
-    },
-    sourceDot: {
-        width: rpx(11),
-        height: rpx(11),
-        marginRight: rpx(10),
-        borderRadius: rpx(6),
-        backgroundColor: "#275D46",
+        justifyContent: "center",
     },
     section: {
         marginTop: rpx(18),
@@ -325,4 +329,7 @@ const styles = StyleSheet.create({
         height: rpx(34),
     },
     exitText: { marginLeft: rpx(10) },
+    exitPressed: {
+        opacity: 0.58,
+    },
 });

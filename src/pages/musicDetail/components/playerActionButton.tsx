@@ -45,9 +45,9 @@ export default function PlayerActionButton(props: IPlayerActionButtonProps) {
 
 const styles = StyleSheet.create({
     button: {
-        width: rpx(64),
-        height: rpx(64),
-        borderRadius: rpx(22),
+        width: rpx(74),
+        height: rpx(74),
+        borderRadius: rpx(24),
         alignItems: "center",
         justifyContent: "center",
     },
