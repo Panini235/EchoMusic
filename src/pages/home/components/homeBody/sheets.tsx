@@ -33,6 +33,30 @@ export default function Sheets() {
 
     return (
         <>
+            <View style={styles.sectionHeader}>
+                <ThemeText fontSize="title" fontWeight="bold">
+                    {t("home.frequentPlaylists")}
+                </ThemeText>
+                <View style={styles.more}>
+                    <IconButton
+                        name="plus"
+                        style={styles.newSheetButton}
+                        sizeType="normal"
+                        accessibilityLabel={t("home.newPlaylist.a11y")}
+                        onPress={() => {
+                            showPanel("CreateMusicSheet");
+                        }}
+                    />
+                    <IconButton
+                        name="inbox-arrow-down"
+                        sizeType="normal"
+                        accessibilityLabel={t("home.importPlaylist.a11y")}
+                        onPress={() => {
+                            showPanel("ImportMusicSheet");
+                        }}
+                    />
+                </View>
+            </View>
             <View style={styles.subTitleContainer}>
                 <View style={[styles.segmented, { backgroundColor: colors.placeholder }]}>
                     <Pressable
@@ -72,7 +96,7 @@ export default function Sheets() {
                         ]}
                         accessible
                         accessibilityLabel={t("home.starredPlaylistsCount.a11y", {
-                            count: allSheets.length,
+                            count: staredSheets.length,
                         })}
                         onPress={() => {
                             setIndex(1);
@@ -93,25 +117,6 @@ export default function Sheets() {
                         ({staredSheets.length})
                         </ThemeText>
                     </Pressable>
-                </View>
-                <View style={styles.more}>
-                    <IconButton
-                        name="plus"
-                        style={styles.newSheetButton}
-                        sizeType="normal"
-                        accessibilityLabel={t("home.newPlaylist.a11y")}
-                        onPress={() => {
-                            showPanel("CreateMusicSheet");
-                        }}
-                    />
-                    <IconButton
-                        name="inbox-arrow-down"
-                        sizeType="normal"
-                        accessibilityLabel={t("home.importPlaylist.a11y")}
-                        onPress={() => {
-                            showPanel("ImportMusicSheet");
-                        }}
-                    />
                 </View>
             </View>
             <FlashList
@@ -207,6 +212,14 @@ export default function Sheets() {
 }
 
 const styles = StyleSheet.create({
+    sectionHeader: {
+        marginTop: rpx(42),
+        marginBottom: rpx(16),
+        paddingHorizontal: rpx(28),
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
     subTitleContainer: {
         paddingHorizontal: rpx(28),
         flexDirection: "row",
@@ -241,10 +254,8 @@ const styles = StyleSheet.create({
     },
     more: {
         height: rpx(64),
-        marginTop: rpx(3),
-        flexGrow: 1,
         flexDirection: "row",
-        justifyContent: "flex-end",
+        alignItems: "center",
     },
     newSheetButton: {
         marginRight: rpx(24),
@@ -254,7 +265,7 @@ const styles = StyleSheet.create({
     },
     sheetCard: {
         marginBottom: rpx(14),
-        borderRadius: rpx(24),
+        borderRadius: rpx(26),
         borderWidth: StyleSheet.hairlineWidth,
         overflow: "hidden",
     },

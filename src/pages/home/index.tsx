@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import NavBar from "./components/navBar";
 import MusicBar from "@/components/musicBar";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import type { DrawerContentComponentProps } from "@react-navigation/drawer";
 import HomeDrawer from "./components/drawer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import StatusBar from "@/components/base/statusBar";
@@ -16,6 +17,7 @@ import useOrientation from "@/hooks/useOrientation";
 import { useTheme } from "@react-navigation/native";
 import Color from "color";
 import rpx from "@/utils/rpx";
+import BottomDock from "./components/bottomDock";
 
 function Home() {
     const orientation = useOrientation();
@@ -34,6 +36,7 @@ function Home() {
                 </>
             </HorizontalSafeAreaView>
             <MusicBar />
+            {orientation === "vertical" ? <BottomDock /> : null}
         </SafeAreaView>
     );
 }
@@ -62,29 +65,35 @@ function HomeStatusBar() {
 //     );
 // }
 
-const LeftDrawer = createDrawerNavigator();
+const ControlDrawer = createDrawerNavigator();
+
+function renderHomeDrawer(props: DrawerContentComponentProps) {
+    return <HomeDrawer {...props} />;
+}
+
 export default function App() {
     const { colors } = useTheme();
 
     return (
-        <LeftDrawer.Navigator
+        <ControlDrawer.Navigator
             screenOptions={{
                 headerShown: false,
                 drawerType: "front",
+                drawerPosition: "right",
                 swipeEdgeWidth: rpx(48),
                 overlayColor: Color(colors.text).alpha(0.34).toString(),
                 drawerStyle: {
-                    width: "86%",
+                    width: "78%",
                     backgroundColor: "transparent",
-                    borderTopRightRadius: rpx(34),
-                    borderBottomRightRadius: rpx(34),
+                    borderTopLeftRadius: rpx(34),
+                    borderBottomLeftRadius: rpx(34),
                     overflow: "hidden",
                 },
             }}
             initialRouteName="HOME-MAIN"
-            drawerContent={props => <HomeDrawer {...props} />}>
-            <LeftDrawer.Screen name="HOME-MAIN" component={Home} />
-        </LeftDrawer.Navigator>
+            drawerContent={renderHomeDrawer}>
+            <ControlDrawer.Screen name="HOME-MAIN" component={Home} />
+        </ControlDrawer.Navigator>
     );
 }
 

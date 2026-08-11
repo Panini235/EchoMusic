@@ -34,6 +34,19 @@ downloader.injectDependencies(Config, PluginManager);
 lyricManager.injectDependencies(TrackPlayer, Config, PluginManager);
 MusicSheet.injectDependencies(Config);
 
+let nativeSplashHidden = false;
+
+async function hideNativeSplash() {
+    if (nativeSplashHidden) {
+        return;
+    }
+    try {
+        await SplashScreen.hideAsync();
+        nativeSplashHidden = true;
+    } catch (error) {
+        console.warn(error);
+    }
+}
 
 async function bootstrapImpl() {
     await SplashScreen.preventAutoHideAsync()
@@ -68,6 +81,13 @@ async function bootstrapImpl() {
     trace("配置初始化完成");
     logger.mark("配置初始化完成");
 
+    // 先准备主题和文案，然后尽快交给可动的应用内启动页。
+    // 插件和播放器初始化较慢时，不再让用户误以为静态图标卡死。
+    Theme.setup();
+    i18n.setup();
+    logger.mark("主题与语言初始化完成");
+    await hideNativeSplash();
+
     // 加载插件
     await PluginManager.setup();
     logger.mark("插件初始化完成");
@@ -89,14 +109,7 @@ async function bootstrapImpl() {
     trace("本地音乐初始化完成");
     logger.mark("本地音乐初始化完成");
 
-    Theme.setup();
-    trace("主题初始化完成");
-    logger.mark("主题初始化完成");
-
     extraMakeup();
-
-    i18n.setup();
-    logger.mark("语言模块初始化完成");
     
     ErrorUtils.setGlobalHandler(error => {
         errorLog("未捕获的错误", error);
@@ -283,9 +296,13 @@ export default async function () {
         });
         await bootstrapImpl();
         bindEvents();
-        getDefaultStore().set(bootstrapAtom, {
-            "state": "Done",
-        });
+        // 播放器初始化失败时保留可恢复状态，交给前台重试，
+        // 避免刚设置的 TrackPlayerError 被 Done 立即覆盖。
+        if (getDefaultStore().get(bootstrapAtom).state === "Loading") {
+            getDefaultStore().set(bootstrapAtom, {
+                state: "Done",
+            });
+        }
     } catch (e: any) {
         errorLog("初始化出错", e);
         if (getDefaultStore().get(bootstrapAtom).state === "Loading") {
@@ -295,7 +312,5 @@ export default async function () {
             });
         }
     }
-    // 隐藏开屏动画
-    console.log("HIDE");
-    await SplashScreen.hideAsync();
+    await hideNativeSplash();
 }

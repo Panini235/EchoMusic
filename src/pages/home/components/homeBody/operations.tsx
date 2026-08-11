@@ -4,6 +4,7 @@ import rpx from "@/utils/rpx";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import ActionButton from "../ActionButton";
+import ThemeText from "@/components/base/themeText";
 
 export default function Operations() {
     const navigate = useNavigate();
@@ -45,30 +46,41 @@ export default function Operations() {
     ] as const;
 
     return (
-        <View style={styles.container}>
-            {actionButtons.map((action, index) => (
-                <ActionButton
-                    style={styles.actionButtonStyle}
-                    delay={80 + index * 45}
-                    key={action.title}
-                    {...action}
-                />
-            ))}
+        <View style={styles.section}>
+            <ThemeText fontSize="title" fontWeight="bold" style={styles.title}>
+                {t("home.quickAccess")}
+            </ThemeText>
+            <View style={styles.container}>
+                {actionButtons.map((action, index) => (
+                    <ActionButton
+                        style={styles.actionButtonStyle}
+                        delay={80 + index * 45}
+                        key={action.title}
+                        {...action}
+                    />
+                ))}
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    section: {
+        marginTop: rpx(40),
+    },
+    title: {
+        marginHorizontal: rpx(28),
+        marginBottom: rpx(18),
+    },
     container: {
         width: rpx(750),
         paddingHorizontal: rpx(28),
-        marginTop: rpx(28),
-        marginBottom: rpx(36),
+        marginBottom: rpx(22),
         flexDirection: "row",
         gap: rpx(16),
     },
     actionButtonStyle: {
         width: rpx(161.5),
-        height: rpx(164),
+        height: rpx(142),
     },
 });
