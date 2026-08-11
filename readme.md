@@ -29,16 +29,15 @@ EchoMusic 在保留 MusicFree 插件生态与播放器能力的基础上，重�
 
 ## 下载与安装
 
-EchoMusic 当前通过 GitHub Actions 提供 Android APK，不要求普通用户自行安装
-Android SDK。
+EchoMusic 当前通过 GitHub Releases 提供 Android APK，不要求普通用户自行安装
+Android SDK，也不需要先解压 ZIP。
 
-1. 打开 [Android CI](https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml)。
-2. 选择带有绿色对勾的最新构建。
-3. 在运行页面底部下载 `EchoMusic-standalone-*` 构建产物。
-4. 解压下载的 ZIP 文件并安装其中的 APK。
+1. 打开 [Releases](https://github.com/Panini235/EchoMusic/releases)。
+2. 选择最新版本。
+3. 直接下载 `EchoMusic-v*-universal.apk` 并安装。
 
-GitHub Actions 构建产物保留 14 天。安装 APK 时，Android 可能要求授权当前浏览器
-或文件管理器“安装未知应用”。请确认下载来源确实为本仓库后再继续安装。
+每个版本同时提供 `.sha256` 校验文件。安装 APK 时，Android 可能要求授权当前
+浏览器或文件管理器“安装未知应用”。请确认下载来源确实为本仓库后再继续安装。
 
 ## 插件使用
 
@@ -69,20 +68,21 @@ Release APK，并上传可独立安装的产物。
 
 | 触发方式 | 行为 |
 | --- | --- |
-| 推送到 `main` 或 `agent/**` | 自动验证并构建 APK |
 | 提交面向 `main` 的 Pull Request | 自动验证并构建 APK |
-| 推送任意 Tag | 自动验证并构建 APK |
-| Actions 页面选择 `Run workflow` | 手动验证并构建 APK |
+| 推送与应用版本一致的 Tag | 自动验证、构建并发布直接下载的 APK |
+| Actions 页面选择 `Run workflow` | 输入版本 Tag，手动构建并发布直接下载的 APK |
 
 发布 Tag 示例：
 
 ```bash
-git tag v0.6.2
-git push origin v0.6.2
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
-手动构建时，进入 Android CI 页面，点击 **Run workflow** 并选择需要构建的分支。
-成功产物命名为 `EchoMusic-standalone-<运行序号>`。
+手动构建时，进入 Android CI 页面，点击 **Run workflow**，选择需要构建的分支，
+并输入与 `package.json` 一致的版本 Tag。成功后，安装包会发布到 Releases，命名为
+`EchoMusic-v<版本>-universal.apk`。普通分支和 Pull Request 只执行验证构建，不发布
+ZIP 产物。
 
 当前 Workflow 使用 Node.js 20、Java 17 和 Gradle 缓存。React Native/Android 的
 原生依赖下载与 Release 编译通常是最耗时的部分；首次构建或缓存未命中时可能需要

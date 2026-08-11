@@ -390,6 +390,38 @@ class TrackPlayer extends EventEmitter<{
         }
     }
 
+    async reorderPlayList(
+        newPlayList: IMusic.IMusicItem[],
+    ): Promise<boolean> {
+        const currentPlayList = this.playList;
+        const newIndexMap = createMediaIndexMap(newPlayList);
+
+        if (
+            newPlayList.length !== currentPlayList.length ||
+            currentPlayList.some(item => !newIndexMap.has(item))
+        ) {
+            return false;
+        }
+
+        const timestamp = Date.now();
+        newPlayList.forEach((item, index) => {
+            item[timeStampSymbol] = timestamp;
+            item[sortIndexSymbol] = index;
+        });
+
+        this.setPlayList([...newPlayList]);
+
+        try {
+            await ReactNativeTrackPlayer.updateMetadataForTrack(
+                1,
+                this.getFakeNextTrack(),
+            );
+        } catch {
+            // The UI queue is still valid when the native player is not ready.
+        }
+        return true;
+    }
+
     isCurrentMusic(musicItem?: IMusic.IMusicItem | null) {
         return isSameMediaItem(musicItem, this.currentMusic);
     }

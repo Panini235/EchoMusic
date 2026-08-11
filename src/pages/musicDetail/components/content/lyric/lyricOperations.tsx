@@ -13,6 +13,7 @@ import useOrientation from "@/hooks/useOrientation";
 import HeartIcon from "../heartIcon";
 import Icon from "@/components/base/icon.tsx";
 import lyricManager, { useLyricState } from "@/core/lyricManager";
+import PlayerActionButton from "../../playerActionButton";
 
 interface ILyricOperationsProps {
     scrollToCurrentLrcItem: () => void;
@@ -34,10 +35,8 @@ export default function LyricOperations(props: ILyricOperationsProps) {
     return (
         <View style={styles.container}>
             {orientation === "vertical" ? <HeartIcon /> : null}
-            <Icon
-                name="font-size"
-                size={iconSizeConst.normal}
-                color="white"
+            <PlayerActionButton
+                accessibilityLabel="歌词字号"
                 onPress={() => {
                     showPanel("SetFontSize", {
                         defaultSelect: detailFontSize ?? 1,
@@ -46,12 +45,11 @@ export default function LyricOperations(props: ILyricOperationsProps) {
                             scrollToCurrentLrcItem();
                         },
                     });
-                }}
-            />
-            <Icon
-                name="arrows-left-right"
-                size={iconSizeConst.normal}
-                color="white"
+                }}>
+                <Icon name="font-size" size={iconSizeConst.normal} color="white" />
+            </PlayerActionButton>
+            <PlayerActionButton
+                accessibilityLabel="调整歌词时间"
                 onPress={() => {
                     const currentMusicItem = TrackPlayer.currentMusic;
 
@@ -65,13 +63,12 @@ export default function LyricOperations(props: ILyricOperationsProps) {
                             },
                         });
                     }
-                }}
-            />
+                }}>
+                <Icon name="arrows-left-right" size={iconSizeConst.normal} color="white" />
+            </PlayerActionButton>
 
-            <Icon
-                name="magnifying-glass"
-                size={iconSizeConst.normal}
-                color="white"
+            <PlayerActionButton
+                accessibilityLabel="搜索歌词"
                 onPress={() => {
                     const currentMusic = TrackPlayer.currentMusic;
                     if (!currentMusic) {
@@ -89,16 +86,11 @@ export default function LyricOperations(props: ILyricOperationsProps) {
                         musicItem: currentMusic,
                     });
                     // }
-                }}
-            />
-            <TranslationIcon
-                width={iconSizeConst.normal}
-                height={iconSizeConst.normal}
-                opacity={!hasTranslation ? 0.2 : showTranslation ? 1 : 0.5}
-                color={
-                    showTranslation && hasTranslation ? colors.primary : "white"
-                }
-                // style={}
+                }}>
+                <Icon name="magnifying-glass" size={iconSizeConst.normal} color="white" />
+            </PlayerActionButton>
+            <PlayerActionButton
+                accessibilityLabel="显示歌词翻译"
                 onPress={() => {
                     if (!hasTranslation) {
                         Toast.warn("当前歌曲无翻译");
@@ -110,12 +102,18 @@ export default function LyricOperations(props: ILyricOperationsProps) {
                         !showTranslation,
                     );
                     scrollToCurrentLrcItem();
-                }}
-            />
-            <Icon
-                name="ellipsis-vertical"
-                size={iconSizeConst.normal}
-                color={"white"}
+                }}>
+                <TranslationIcon
+                    width={iconSizeConst.normal}
+                    height={iconSizeConst.normal}
+                    opacity={!hasTranslation ? 0.2 : showTranslation ? 1 : 0.5}
+                    color={
+                        showTranslation && hasTranslation ? colors.primary : "white"
+                    }
+                />
+            </PlayerActionButton>
+            <PlayerActionButton
+                accessibilityLabel="更多歌词选项"
                 onPress={() => {
                     const currentMusic = TrackPlayer.currentMusic;
                     if (currentMusic) {
@@ -123,8 +121,9 @@ export default function LyricOperations(props: ILyricOperationsProps) {
                             musicItem: currentMusic,
                         });
                     }
-                }}
-            />
+                }}>
+                <Icon name="ellipsis-vertical" size={iconSizeConst.normal} color="white" />
+            </PlayerActionButton>
         </View>
     );
 }

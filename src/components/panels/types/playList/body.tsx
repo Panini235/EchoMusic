@@ -1,17 +1,18 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import rpx from "@/utils/rpx";
 import Tag from "@/components/base/tag";
 import ThemeText from "@/components/base/themeText";
 import { fontSizeConst } from "@/constants/uiConst";
-import { isSameMediaItem } from "@/utils/mediaUtils";
-import IconButton from "@/components/base/iconButton";
+import { getMediaUniqueKey, isSameMediaItem } from "@/utils/mediaUtils";
 import Loading from "@/components/base/loading";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useColors from "@/hooks/useColors";
 import TrackPlayer, { useCurrentMusic, usePlayList } from "@/core/trackPlayer";
-import { FlashList } from "@shopify/flash-list";
 import Icon from "@/components/base/icon.tsx";
+import SortableFlatList from "@/components/base/SortableFlatList";
+import useOrientation from "@/hooks/useOrientation";
+import { vh } from "@/utils/rpx";
 
 const ITEM_HEIGHT = rpx(108);
 const ITEM_WIDTH = rpx(750);
@@ -59,14 +60,25 @@ function _PlayListItem(props: IPlayListProps) {
                 )}
             </ThemeText>
             <Tag tagName={item.platform} />
-            <IconButton
-                style={{ marginLeft: rpx(14) }}
-                name="x-mark"
-                sizeType="small"
-                onPress={() => {
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="从播放队列移除"
+                hitSlop={6}
+                style={({ pressed }) => [
+                    style.removeButton,
+                    pressed ? style.removeButtonPressed : null,
+                ]}
+                onPress={event => {
+                    event.stopPropagation();
                     TrackPlayer.remove(item);
-                }}
-            />
+                }}>
+                <Icon
+                    pointerEvents="none"
+                    name="x-mark"
+                    size={rpx(36)}
+                    color={colors.textSecondary}
+                />
+            </Pressable>
         </Pressable>
     );
 }
@@ -85,8 +97,9 @@ export default function Body(props: IBodyProps) {
     const { loading } = props;
     const playList = usePlayList();
     const currentMusicItem = useCurrentMusic();
-    const listRef = useRef<FlashList<IMusic.IMusicItem> | null>();
     const safeAreaInsets = useSafeAreaInsets();
+    const colors = useColors();
+    const orientation = useOrientation();
 
     const initIndex = useMemo(() => {
         const id = playList.findIndex(_ =>
@@ -97,7 +110,7 @@ export default function Body(props: IBodyProps) {
             return id;
         }
         return undefined;
-    }, []);
+    }, [currentMusicItem, playList]);
 
     const renderItem = ({ item }: { item: IMusic.IMusicItem; index: number }) => {
         return (
@@ -107,6 +120,14 @@ export default function Body(props: IBodyProps) {
             />
         );
     };
+
+    const marginTop = useMemo(
+        () =>
+            orientation === "horizontal"
+                ? safeAreaInsets.top + rpx(110)
+                : vh(20) + rpx(110),
+        [orientation, safeAreaInsets.top],
+    );
 
     return loading ? (
         <Loading />
@@ -118,15 +139,18 @@ export default function Body(props: IBodyProps) {
                     paddingBottom: safeAreaInsets.bottom,
                 },
             ]}>
-            <FlashList
-                ref={_ => {
-                    listRef.current = _;
-                }}
+            <SortableFlatList
+                activeBackgroundColor={colors.placeholder}
                 extraData={{ currentMusicItem }}
-                estimatedItemSize={ITEM_HEIGHT}
                 data={playList}
+                itemHeight={ITEM_HEIGHT}
                 initialScrollIndex={initIndex}
+                keyExtractor={item => getMediaUniqueKey(item)}
+                marginTop={marginTop}
                 renderItem={renderItem}
+                onSortEnd={newPlayList => {
+                    TrackPlayer.reorderPlayList(newPlayList);
+                }}
             />
         </View>
     );
@@ -143,11 +167,24 @@ const style = StyleSheet.create({
     musicItem: {
         width: ITEM_WIDTH,
         height: ITEM_HEIGHT,
-        paddingHorizontal: rpx(24),
+        paddingLeft: rpx(24),
+        paddingRight: rpx(106),
         flexDirection: "row",
         alignItems: "center",
     },
     musicItemTitle: {
         flex: 1,
+    },
+    removeButton: {
+        width: rpx(58),
+        height: rpx(58),
+        marginLeft: rpx(8),
+        borderRadius: rpx(20),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    removeButtonPressed: {
+        opacity: 0.56,
+        backgroundColor: "rgba(127,127,127,0.12)",
     },
 });

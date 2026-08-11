@@ -5,9 +5,10 @@ import { useNavigation } from "@react-navigation/native";
 import { fontSizeConst, fontWeightConst } from "@/constants/uiConst";
 import Share from "react-native-share";
 import { B64Asset } from "@/constants/assetsConst";
-import IconButton from "@/components/base/iconButton";
 import { useCurrentMusic } from "@/core/trackPlayer";
 import { useI18N } from "@/core/i18n";
+import Icon from "@/components/base/icon";
+import PlayerActionButton from "./playerActionButton";
 
 export default function NavBar() {
     const navigation = useNavigation();
@@ -17,15 +18,14 @@ export default function NavBar() {
 
     return (
         <View style={styles.container}>
-            <IconButton
-                name="arrow-left"
-                sizeType={"normal"}
-                color="white"
+            <PlayerActionButton
+                accessibilityLabel="返回"
                 style={styles.button}
                 onPress={() => {
                     navigation.goBack();
-                }}
-            />
+                }}>
+                <Icon name="arrow-left" size={rpx(44)} color="white" />
+            </PlayerActionButton>
             <View style={styles.headerContent}>
                 <Text numberOfLines={1} style={styles.eyebrow}>
                     {musicItem?.platform
@@ -33,10 +33,8 @@ export default function NavBar() {
                         : t("musicDetail.nowPlaying")}
                 </Text>
             </View>
-            <IconButton
-                name="share"
-                color="white"
-                sizeType="normal"
+            <PlayerActionButton
+                accessibilityLabel="分享 EchoMusic"
                 style={styles.button}
                 onPress={async () => {
                     try {
@@ -48,8 +46,9 @@ export default function NavBar() {
                             subject: "畅听分享",
                         });
                     } catch {}
-                }}
-            />
+                }}>
+                <Icon name="share" size={rpx(44)} color="white" />
+            </PlayerActionButton>
         </View>
     );
 }

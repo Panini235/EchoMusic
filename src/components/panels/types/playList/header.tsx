@@ -15,17 +15,19 @@ export default function Header() {
 
     return (
         <View style={style.wrapper}>
-            <ThemeText
-                style={style.headerText}
-                fontSize="title"
-                fontWeight="bold">
-                {t("panel.playList.title")}
-                <ThemeText fontColor="textSecondary">
-                    {t("panel.playList.count", {
-                        count: playList.length,
-                    })}
+            <View style={style.headerText}>
+                <ThemeText fontSize="title" fontWeight="bold">
+                    {t("panel.playList.title")}
+                    <ThemeText fontColor="textSecondary">
+                        {t("panel.playList.count", {
+                            count: playList.length,
+                        })}
+                    </ThemeText>
                 </ThemeText>
-            </ThemeText>
+                <ThemeText fontColor="textSecondary" fontSize="description">
+                    {t("panel.playList.reorderHint")}
+                </ThemeText>
+            </View>
             <IconTextButton
                 onPress={() => {
                     InteractionManager.runAfterInteractions(async () => {
@@ -60,5 +62,6 @@ const style = StyleSheet.create({
     },
     headerText: {
         flex: 1,
+        justifyContent: "center",
     },
 });

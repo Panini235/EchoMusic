@@ -2,15 +2,17 @@ name: Android CI
 
 on:
   push:
-    branches:
-      - main
-      - "agent/**"
     tags:
-      - "*"
+      - "v*"
   pull_request:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "要发布的版本 Tag（例如 v1.0.0）"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -24,10 +26,14 @@ jobs:
     name: Validate and build standalone APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -59,18 +65,71 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: EchoMusic-standalone-${{ github.run_number }}
-          path: android/app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
-          retention-days: 14
+      - name: Prepare install package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_version="$(node -p "require('./package.json').version")"
+          source_apk="android/app/build/outputs/apk/release/app-universal-release.apk"
+          apk_name="EchoMusic-v${app_version}-universal.apk"
+          apk_path="${RUNNER_TEMP}/${apk_name}"
+
+          test -f "${source_apk}"
+          cp "${source_apk}" "${apk_path}"
+          cd "${RUNNER_TEMP}"
+          sha256sum "${apk_name}" > "${apk_name}.sha256"
+
+          echo "app_version=${app_version}" >> "${GITHUB_OUTPUT}"
+          echo "apk_name=${apk_name}" >> "${GITHUB_OUTPUT}"
+          echo "apk_path=${apk_path}" >> "${GITHUB_OUTPUT}"
+          echo "checksum_path=${apk_path}.sha256" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish direct APK to GitHub Release
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.release_tag }}
+          APP_VERSION: ${{ steps.package.outputs.app_version }}
+          APK_PATH: ${{ steps.package.outputs.apk_path }}
+          CHECKSUM_PATH: ${{ steps.package.outputs.checksum_path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_tag="v${APP_VERSION}"
+          if [[ "${RELEASE_TAG}" != "${expected_tag}" ]]; then
+            echo "Release Tag ${RELEASE_TAG} 与应用版本 ${expected_tag} 不一致" >&2
+            exit 1
+          fi
+
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" \
+              "${APK_PATH}" "${CHECKSUM_PATH}" \
+              --clobber \
+              --repo "${GITHUB_REPOSITORY}"
+          else
+            target_args=()
+            if ! git rev-parse --verify --quiet "refs/tags/${RELEASE_TAG}" >/dev/null; then
+              target_args=(--target "${GITHUB_SHA}")
+            fi
+            gh release create "${RELEASE_TAG}" \
+              "${APK_PATH}" "${CHECKSUM_PATH}" \
+              "${target_args[@]}" \
+              --title "EchoMusic ${RELEASE_TAG}" \
+              --generate-notes \
+              --repo "${GITHUB_REPOSITORY}"
+          fi
 
       - name: Build summary
         if: always()
+        env:
+          PUBLISHED_TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.release_tag }}
         run: |
           echo "### EchoMusic Android CI" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`${GITHUB_SHA::7}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Type check, tests and a standalone Android build run in one clean Ubuntu job." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Successful runs publish installable APK artifacts for 14 days." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${GITHUB_REF_TYPE}" == "tag" || "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "- Direct APK: GitHub Release \`${PUBLISHED_TAG}\` (no ZIP wrapper)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Validation build only. Push a Tag or run this workflow manually to publish a direct APK." >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -433,6 +433,7 @@ export interface ILanguageData {
     // 面板相关 - 播放列表
     "panel.playList.title": string; // 播放列表
     "panel.playList.count": string; // 歌曲数量
+    "panel.playList.reorderHint": string; // 拖拽调整播放顺序
     "panel.searchLrc.inputPlaceholder": string; // 搜索歌词输入占位符
     "panel.searchLrc.toast.settingSuccess": string; // 设置成功
     "panel.searchLrc.toast.failToSearch": string; // 设置失败

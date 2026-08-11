@@ -31,6 +31,9 @@ const defaultZIndex = 10;
 interface ISortableFlatListProps<T> {
     data: T[];
     renderItem: (props: { item: T; index: number }) => JSX.Element;
+    extraData?: unknown;
+    initialScrollIndex?: number;
+    keyExtractor?: (item: T, index: number) => string;
     // 高度
     itemHeight: number;
     itemJustifyContent?:
@@ -59,6 +62,9 @@ export default function SortableFlatList<T extends any = any>(
         marginTop,
         activeBackgroundColor,
         onSortEnd,
+        extraData,
+        initialScrollIndex,
+        keyExtractor,
     } = props;
 
     // 不要干扰原始数据
@@ -175,7 +181,10 @@ export default function SortableFlatList<T extends any = any>(
                     layoutRef.current = evt.nativeEvent.layout;
                 }}
                 data={_data}
+                extraData={extraData}
                 estimatedItemSize={itemHeight}
+                initialScrollIndex={initialScrollIndex}
+                keyExtractor={keyExtractor}
                 scrollEventThrottle={16}
                 onTouchStart={e => {
                     if (activeRef.current !== -1) {

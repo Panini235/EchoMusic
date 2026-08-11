@@ -23,7 +23,7 @@ export default function Background() {
     }, [musicItem?.artwork]);
 
     return (
-        <>
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <View style={style.background} />
             <Animated.Image
                 key={`${musicItem?.platform ?? "local"}-${musicItem?.id ?? musicItem?.title ?? "empty"}`}
@@ -38,7 +38,7 @@ export default function Background() {
                 locations={[0, 0.50, 1]}
                 style={style.overlay}
             />
-        </>
+        </View>
     );
 }
 

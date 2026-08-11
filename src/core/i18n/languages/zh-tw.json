@@ -361,6 +361,7 @@
     "dialog.markdownDialog.loadFailed": "圖片載入失敗",
     "panel.playList.title": "播放列表",
     "panel.playList.count": " ({count}首)",
+    "panel.playList.reorderHint": "按住右側拖動調整順序",
     "panel.searchLrc.inputPlaceholder": "輸入歌曲名稱",
     "panel.searchLrc.toast.settingSuccess": "設定成功~",
     "panel.searchLrc.toast.failToSearch": "設定失敗！",

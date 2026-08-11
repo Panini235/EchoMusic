@@ -361,6 +361,7 @@
     "dialog.markdownDialog.loadFailed": "Image load failed",
     "panel.playList.title": "Play List",
     "panel.playList.count": " ({count} songs)",
+    "panel.playList.reorderHint": "Hold the handle to reorder",
     "panel.searchLrc.inputPlaceholder": "Enter song name",
     "panel.searchLrc.toast.settingSuccess": "Settings saved successfully~",
     "panel.searchLrc.toast.failToSearch": "Settings failed!",

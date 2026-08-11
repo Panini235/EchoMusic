@@ -1,5 +1,10 @@
-{"version":"0.6.2","changeLog":[
-  "【品牌】升级为 EchoMusic · 畅听",
+{"version":"1.0.0","changeLog":[
+  "【首发】EchoMusic · 畅听第一个正式版本",
   "【界面】重构首页、播放器、侧边栏与浮层视觉",
+  "【交互】扩大播放页触摸区域，修复部分按钮偶发无法点击",
+  "【功能】播放队列支持拖拽排序",
   "【体验】启动时不再主动申请文件权限"
-],"download":["https://github.com/Panini235/EchoMusic/actions/workflows/android-ci.yml"]}
+],"download":[
+  "https://github.com/Panini235/EchoMusic/releases/download/v1.0.0/EchoMusic-v1.0.0-universal.apk",
+  "https://github.com/Panini235/EchoMusic/releases/tag/v1.0.0"
+]}

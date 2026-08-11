@@ -109,6 +109,13 @@ export interface ITrackPlayer extends IInjectable, EventEmitter<{
     remove(musicItem: IMusic.IMusicItem): Promise<void>;
 
     /**
+     * Replace the playback queue order without interrupting the current track.
+     * @param newPlayList The same queue items in their new order
+     * @returns Whether the new order was accepted
+     */
+    reorderPlayList(newPlayList: IMusic.IMusicItem[]): Promise<boolean>;
+
+    /**
      * 判断指定音乐是否是当前播放的音乐
      * @param musicItem 要判断的音乐
      * @returns 是否是当前音乐

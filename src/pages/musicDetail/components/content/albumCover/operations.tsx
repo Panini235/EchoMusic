@@ -1,5 +1,5 @@
-import React, { ReactNode, useMemo } from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import React, { useMemo } from "react";
+import { Image, StyleSheet, View } from "react-native";
 import rpx from "@/utils/rpx";
 
 import LocalMusicSheet from "@/core/localMusicSheet";
@@ -19,6 +19,7 @@ import downloader from "@/core/downloader";
 import i18n from "@/core/i18n";
 import ThemeText from "@/components/base/themeText";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import PlayerActionButton from "../../playerActionButton";
 
 export default function Operations() {
     const musicItem = useCurrentMusic();
@@ -60,8 +61,8 @@ export default function Operations() {
             </Animated.View>
             <View style={styles.actionSurface}>
                 <HeartIcon />
-                <OperationButton
-                    label="切换音质"
+                <PlayerActionButton
+                    accessibilityLabel="切换音质"
                     onPress={() => {
                         if (!musicItem) {
                             return;
@@ -81,9 +82,9 @@ export default function Operations() {
                         source={ImgAsset.quality[currentQuality]}
                         style={styles.quality}
                     />
-                </OperationButton>
-                <OperationButton
-                    label={isDownloaded ? "已下载" : "下载"}
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel={isDownloaded ? "已下载" : "下载"}
                     onPress={() => {
                         if (!musicItem) {
                             return;
@@ -106,9 +107,9 @@ export default function Operations() {
                         size={iconSizeConst.normal}
                         color="white"
                     />
-                </OperationButton>
-                <OperationButton
-                    label="播放速度"
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel="播放速度"
                     onPress={() => {
                         if (!musicItem) {
                             return;
@@ -128,9 +129,9 @@ export default function Operations() {
                         source={ImgAsset.rate[rate!]}
                         style={styles.quality}
                     />
-                </OperationButton>
-                <OperationButton
-                    label="评论"
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel="评论"
                     onPress={() => {
                         if (!supportComment) {
                             toast.warn(i18n.t("toast.commmentNotAvaliableForCurrentMusic"));
@@ -149,9 +150,9 @@ export default function Operations() {
                         color="white"
                         opacity={supportComment ? 1 : 0.28}
                     />
-                </OperationButton>
-                <OperationButton
-                    label="更多"
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel="更多"
                     onPress={() => {
                         if (musicItem) {
                             showPanel("MusicItemOptions", {
@@ -166,29 +167,9 @@ export default function Operations() {
                         size={iconSizeConst.normal}
                         color="white"
                     />
-                </OperationButton>
+                </PlayerActionButton>
             </View>
         </View>
-    );
-}
-
-function OperationButton(props: {
-    label: string;
-    onPress: () => void;
-    children: ReactNode;
-}) {
-    return (
-        <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={props.label}
-            hitSlop={6}
-            onPress={props.onPress}
-            style={({ pressed }) => [
-                styles.operationButton,
-                pressed ? styles.operationButtonPressed : null,
-            ]}>
-            {props.children}
-        </Pressable>
     );
 }
 
@@ -218,18 +199,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: rpx(7),
-    },
-    operationButton: {
-        width: rpx(64),
-        height: rpx(64),
-        borderRadius: rpx(22),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    operationButtonPressed: {
-        opacity: 0.55,
-        backgroundColor: "rgba(255,255,255,0.10)",
-        transform: [{ scale: 0.92 }],
     },
     quality: {
         width: rpx(52),

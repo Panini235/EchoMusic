@@ -3,8 +3,7 @@ import { iconSizeConst } from "@/constants/uiConst";
 import { useCurrentMusic } from "@/core/trackPlayer";
 import Icon from "@/components/base/icon.tsx";
 import MusicSheet, { useFavorite } from "@/core/musicSheet";
-import { Pressable, StyleSheet } from "react-native";
-import rpx from "@/utils/rpx";
+import PlayerActionButton from "../../playerActionButton";
 
 export default function () {
     const musicItem = useCurrentMusic();
@@ -23,31 +22,14 @@ export default function () {
     };
 
     return (
-        <Pressable
-            accessibilityRole="button"
+        <PlayerActionButton
             accessibilityLabel={isFavorite ? "取消喜欢" : "喜欢"}
-            hitSlop={8}
-            onPress={onPress}
-            style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}>
+            onPress={onPress}>
             <Icon
-                pointerEvents="none"
                 name={isFavorite ? "heart" : "heart-outline"}
                 size={iconSizeConst.normal}
                 color={isFavorite ? "#FF6B62" : "white"}
             />
-        </Pressable>
+        </PlayerActionButton>
     );
 }
-
-const styles = StyleSheet.create({
-    button: {
-        width: rpx(64),
-        height: rpx(64),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    pressed: {
-        opacity: 0.56,
-        transform: [{ scale: 0.92 }],
-    },
-});

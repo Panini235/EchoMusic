@@ -14,6 +14,7 @@ import Animated, {
     useSharedValue,
     withSpring,
 } from "react-native-reanimated";
+import PlayerActionButton from "../playerActionButton";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -30,25 +31,25 @@ export default function () {
                     style.wrapper,
                     orientation === "horizontal" ? style.horizontalWrapper : null,
                 ]}>
-                <Icon
-                    color={"white"}
-                    name={repeatModeConst[repeatMode].icon}
-                    size={rpx(56)}
+                <PlayerActionButton
+                    accessibilityLabel="切换播放模式"
+                    style={style.controlButton}
                     onPress={async () => {
                         InteractionManager.runAfterInteractions(async () => {
                             await delay(20, false);
                             TrackPlayer.toggleRepeatMode();
                         });
-                    }}
-                />
-                <Icon
-                    color={"white"}
-                    name={"skip-left"}
-                    size={rpx(56)}
+                    }}>
+                    <Icon color="white" name={repeatModeConst[repeatMode].icon} size={rpx(48)} />
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel="上一首"
+                    style={style.controlButton}
                     onPress={() => {
                         TrackPlayer.skipToPrevious();
-                    }}
-                />
+                    }}>
+                    <Icon color="white" name="skip-left" size={rpx(48)} />
+                </PlayerActionButton>
                 <AnimatedPlayButton
                     paused={musicIsPaused(musicState)}
                     onPress={() => {
@@ -59,22 +60,22 @@ export default function () {
                         }
                     }}
                 />
-                <Icon
-                    color={"white"}
-                    name={"skip-right"}
-                    size={rpx(56)}
+                <PlayerActionButton
+                    accessibilityLabel="下一首"
+                    style={style.controlButton}
                     onPress={() => {
                         TrackPlayer.skipToNext();
-                    }}
-                />
-                <Icon
-                    color={"white"}
-                    name={"playlist"}
-                    size={rpx(56)}
+                    }}>
+                    <Icon color="white" name="skip-right" size={rpx(48)} />
+                </PlayerActionButton>
+                <PlayerActionButton
+                    accessibilityLabel="播放队列"
+                    style={style.controlButton}
                     onPress={() => {
                         showPanel("PlayList");
-                    }}
-                />
+                    }}>
+                    <Icon color="white" name="playlist" size={rpx(48)} />
+                </PlayerActionButton>
             </View>
         </>
     );
@@ -98,6 +99,7 @@ function AnimatedPlayButton(props: { paused: boolean; onPress: () => void }) {
             }}
             onPress={props.onPress}>
             <Icon
+                pointerEvents="none"
                 color="#201C19"
                 name={props.paused ? "play" : "pause"}
                 size={rpx(66)}
@@ -117,6 +119,11 @@ const style = StyleSheet.create({
     },
     horizontalWrapper: {
         marginTop: 0,
+    },
+    controlButton: {
+        width: rpx(72),
+        height: rpx(72),
+        borderRadius: rpx(24),
     },
     playButton: {
         width: rpx(104),
