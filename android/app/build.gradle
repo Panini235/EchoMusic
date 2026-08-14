@@ -120,7 +120,7 @@ static def getVersion() {
 // }
 
 def appVersion = getVersion()
-def appVersionCode = 400013
+def appVersionCode = 400014
 
 
 android {

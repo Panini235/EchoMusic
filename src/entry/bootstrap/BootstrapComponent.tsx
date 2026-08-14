@@ -1,10 +1,9 @@
 import { useAppConfig } from "@/core/appConfig";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Theme from "@/core/theme";
 import useCheckUpdate from "@/hooks/useCheckUpdate";
 import { useListenOrientationChange } from "@/hooks/useOrientation";
 import { getDefaultStore, useAtomValue } from "jotai";
-import { useEffect } from "react";
 import { AppState, Image, NativeEventSubscription, StyleSheet, useColorScheme, View } from "react-native";
 import bootstrapAtom from "./bootstrap.atom";
 import { initTrackPlayer } from "./bootstrap";
@@ -24,9 +23,13 @@ import Animated, {
 } from "react-native-reanimated";
 import rpx from "@/utils/rpx";
 
+// 启动动画只做短暂的视觉承接。初始化任务（尤其是第三方插件）不应阻塞首页交互。
+const MAX_VISUAL_LAUNCH_DURATION = 1200;
+
 export function BootstrapComponent() {
     const bootstrapState = useAtomValue(bootstrapAtom);
     const pulse = useSharedValue(0);
+    const [showLaunchOverlay, setShowLaunchOverlay] = useState(true);
 
     useListenOrientationChange();
     useCheckUpdate();
@@ -105,19 +108,35 @@ export function BootstrapComponent() {
         return () => cancelAnimation(pulse);
     }, [bootstrapState.state, pulse]);
 
+    useEffect(() => {
+        if (bootstrapState.state !== "Loading") {
+            setShowLaunchOverlay(false);
+            return;
+        }
+
+        // 插件初始化可能受网络或第三方脚本影响而变慢；此时仍应允许用户使用已加载的界面。
+        const dismissTimer = setTimeout(() => {
+            setShowLaunchOverlay(false);
+        }, MAX_VISUAL_LAUNCH_DURATION);
+
+        return () => clearTimeout(dismissTimer);
+    }, [bootstrapState.state]);
+
     const logoStyle = useAnimatedStyle(() => ({
         opacity: 0.78 + pulse.value * 0.22,
         transform: [{ scale: 0.94 + pulse.value * 0.06 }],
     }));
 
-    if (bootstrapState.state !== "Loading") {
+    if (bootstrapState.state !== "Loading" || !showLaunchOverlay) {
         return null;
     }
 
     return (
         <Animated.View
             exiting={FadeOut.duration(260)}
-            pointerEvents="auto"
+            // 始终穿透触摸，避免任何异常初始化把全应用变成一张不可点击的启动图。
+            pointerEvents="none"
+            accessible={false}
             style={styles.launchOverlay}>
             <View style={styles.launchContent}>
                 <Animated.View style={[styles.logoShadow, logoStyle]}>

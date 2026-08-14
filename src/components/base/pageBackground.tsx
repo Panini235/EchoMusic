@@ -12,6 +12,7 @@ function PageBackground() {
     return (
         <>
             <View
+                pointerEvents="none"
                 style={[
                     style.wrapper,
                     {
