@@ -15,6 +15,7 @@ export default function (props: IStatusBarProps) {
                 barStyle={barStyle ?? "light-content"}
             />
             <View
+                pointerEvents="none"
                 style={{
                     zIndex: 10000,
                     position: "absolute",
