@@ -13,6 +13,7 @@ export default function Operations() {
 
     const actionButtons = [
         {
+            id: "recommend-sheets",
             iconName: "fire",
             title: t("home.recommendSheet"),
             action() {
@@ -20,6 +21,7 @@ export default function Operations() {
             },
         },
         {
+            id: "top-list",
             iconName: "trophy",
             title: t("home.topList"),
             action() {
@@ -27,6 +29,7 @@ export default function Operations() {
             },
         },
         {
+            id: "play-history",
             iconName: "clock-outline",
             title: t("home.playHistory"),
             action() {
@@ -34,6 +37,7 @@ export default function Operations() {
             },
         },
         {
+            id: "local-music",
             iconName: "folder-music-outline",
             title: t("home.localMusic"),
             action() {
@@ -50,7 +54,7 @@ export default function Operations() {
                         styles.actionButtonStyle,
                         index % 4 ? styles.actionMarginLeft : null,
                     ]}
-                    key={action.title}
+                    key={action.id}
                     {...action}
                 />
             ))}

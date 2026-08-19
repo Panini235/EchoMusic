@@ -195,27 +195,22 @@ class PluginMethodsWrapper implements IPlugin.IPluginInstanceMethods {
         quality: IMusic.IQualityKey = "standard",
         retryCount = 1,
         notUpdateCache = false,
+        skipLegacyLocalResolution = false,
     ): Promise<IPlugin.IMediaSourceResult | null> {
         await this.ensurePluginIsMounted();
-        // 1. 本地搜索 其实直接读mediameta就好了
-        const localPathInMediaExtra = getMediaExtraProperty(musicItem, "localPath");
-        const localPath = getLocalPath(musicItem);
-        if (localPath && (await exists(localPath))) {
-            trace("本地播放", localPath);
-            if (localPathInMediaExtra !== localPath) {
-                // 修正一下本地数据
-                patchMediaExtra(musicItem, {
-                    localPath,
-                });
-
+        if (!skipLegacyLocalResolution) {
+            // Legacy callers retain the original existence-only local shortcut.
+            const localPathInMediaExtra = getMediaExtraProperty(musicItem, "localPath");
+            const localPath = getLocalPath(musicItem);
+            if (localPath && (await exists(localPath))) {
+                trace("本地播放");
+                if (localPathInMediaExtra !== localPath) {
+                    patchMediaExtra(musicItem, { localPath });
+                }
+                return { url: addFileScheme(localPath) };
+            } else if (localPathInMediaExtra) {
+                patchMediaExtra(musicItem, { localPath: undefined });
             }
-            return {
-                url: addFileScheme(localPath),
-            };
-        } else if (localPathInMediaExtra) {
-            patchMediaExtra(musicItem, {
-                localPath: undefined,
-            });
         }
 
         if (musicItem.platform === localPluginPlatform) {
@@ -313,7 +308,13 @@ class PluginMethodsWrapper implements IPlugin.IPluginInstanceMethods {
         } catch (e: any) {
             if (retryCount > 0 && e?.message !== "NOT RETRY") {
                 await delay(150);
-                return this.getMediaSource(musicItem, quality, --retryCount);
+                return this.getMediaSource(
+                    musicItem,
+                    quality,
+                    --retryCount,
+                    false,
+                    skipLegacyLocalResolution,
+                );
             }
             errorLog("获取真实源失败", e?.message);
             devLog("error", "获取真实源失败", e, e?.message);
@@ -861,6 +862,19 @@ export class Plugin {
         pluginManager: IPluginManager,
     ) {
         Plugin.pluginManager = pluginManager;
+    }
+
+    async getPlaybackMediaSource(
+        musicItem: IMusic.IMusicItemBase,
+        quality: IMusic.IQualityKey = "standard",
+    ): Promise<IPlugin.IMediaSourceResult | null> {
+        return (this.methods as PluginMethodsWrapper).getMediaSource(
+            musicItem,
+            quality,
+            1,
+            false,
+            true,
+        );
     }
 
     constructor(

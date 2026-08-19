@@ -9,27 +9,76 @@ import { localPluginPlatform } from "@/constants/commonConst";
 import { useI18N } from "@/core/i18n";
 import MusicSheet, { useSheetsBase, useStarredSheets } from "@/core/musicSheet";
 import { ROUTE_PATH, useNavigate } from "@/core/router";
+import type { HomeNavigationHandler } from "@/pages/home/hooks/useHomeNavigationLatch";
 import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
 import Toast from "@/utils/toast";
 import { FlashList } from "@shopify/flash-list";
-import React, { useMemo, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
 import Color from "color";
+import React, { useCallback, useMemo, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
-export default function Sheets() {
-    const [index, setIndex] = useState(0);
-    const colors = useColors();
-    const navigate = useNavigate();
+export type HomeSheetItem = IMusic.IMusicSheetItemBase;
+type SheetTab = 0 | 1;
 
+export function getHomeSheetKey(sheet: HomeSheetItem) {
+    return `${sheet.platform ?? localPluginPlatform}:${sheet.id}`;
+}
+
+export function isLocalHomeSheet(sheet: HomeSheetItem) {
+    return !(sheet.platform && sheet.platform !== localPluginPlatform);
+}
+
+export function navigateToHomeSheet(
+    navigate: HomeNavigationHandler,
+    sheet: HomeSheetItem,
+) {
+    if (isLocalHomeSheet(sheet)) {
+        navigate(ROUTE_PATH.LOCAL_SHEET_DETAIL, { id: sheet.id });
+        return;
+    }
+
+    navigate(ROUTE_PATH.PLUGIN_SHEET_DETAIL, { sheetInfo: sheet });
+}
+
+export function useSheetSectionModel() {
+    const [selectedTab, setSelectedTab] = useState<SheetTab>(0);
     const allSheets = useSheetsBase();
-    const staredSheets = useStarredSheets();
+    const starredSheets = useStarredSheets();
+    const data = useMemo(
+        () => (selectedTab === 0 ? allSheets : starredSheets) ?? [],
+        [allSheets, selectedTab, starredSheets],
+    );
+
+    return {
+        selectedTab,
+        setSelectedTab,
+        allSheetsCount: allSheets.length,
+        starredSheetsCount: starredSheets.length,
+        data,
+    };
+}
+
+interface SheetSectionHeaderProps {
+    selectedTab: SheetTab;
+    onSelectTab: (tab: SheetTab) => void;
+    allSheetsCount: number;
+    starredSheetsCount: number;
+}
+
+export function SheetSectionHeader(props: SheetSectionHeaderProps) {
+    const {
+        selectedTab,
+        onSelectTab,
+        allSheetsCount,
+        starredSheetsCount,
+    } = props;
+    const colors = useColors();
     const { t } = useI18N();
-
-    const selectedTabTextStyle = useMemo(() => {
-        return [styles.selectTab, { backgroundColor: colors.card }];
-    }, [colors]);
-
+    const selectedTabTextStyle = useMemo(
+        () => [styles.selectTab, { backgroundColor: colors.card }],
+        [colors.card],
+    );
 
     return (
         <>
@@ -43,39 +92,37 @@ export default function Sheets() {
                         style={styles.newSheetButton}
                         sizeType="normal"
                         accessibilityLabel={t("home.newPlaylist.a11y")}
-                        onPress={() => {
-                            showPanel("CreateMusicSheet");
-                        }}
+                        onPress={() => showPanel("CreateMusicSheet")}
                     />
                     <IconButton
                         name="inbox-arrow-down"
                         sizeType="normal"
                         accessibilityLabel={t("home.importPlaylist.a11y")}
-                        onPress={() => {
-                            showPanel("ImportMusicSheet");
-                        }}
+                        onPress={() => showPanel("ImportMusicSheet")}
                     />
                 </View>
             </View>
             <View style={styles.subTitleContainer}>
-                <View style={[styles.segmented, { backgroundColor: colors.placeholder }]}>
+                <View
+                    style={[
+                        styles.segmented,
+                        { backgroundColor: colors.placeholder },
+                    ]}>
                     <Pressable
                         style={({ pressed }) => [
                             styles.tabContainer,
-                            index === 0 ? selectedTabTextStyle : null,
+                            selectedTab === 0 ? selectedTabTextStyle : null,
                             pressed ? styles.tabPressed : null,
                         ]}
                         accessible
                         accessibilityLabel={t("home.myPlaylistsCount.a11y", {
-                            count: allSheets.length,
+                            count: allSheetsCount,
                         })}
-                        onPress={() => {
-                            setIndex(0);
-                        }}>
+                        onPress={() => onSelectTab(0)}>
                         <ThemeText
                             accessible={false}
                             fontSize="title"
-                            fontWeight={index === 0 ? "bold" : "medium"}
+                            fontWeight={selectedTab === 0 ? "bold" : "medium"}
                             style={styles.tabText}>
                             {t("home.myPlaylists")}
                         </ThemeText>
@@ -84,128 +131,129 @@ export default function Sheets() {
                             fontColor="textSecondary"
                             fontSize="subTitle"
                             style={styles.tabText}>
-                            {" "}
-                        ({allSheets.length})
+                            {` (${allSheetsCount})`}
                         </ThemeText>
                     </Pressable>
                     <Pressable
                         style={({ pressed }) => [
                             styles.tabContainer,
-                            index === 1 ? selectedTabTextStyle : null,
+                            selectedTab === 1 ? selectedTabTextStyle : null,
                             pressed ? styles.tabPressed : null,
                         ]}
                         accessible
                         accessibilityLabel={t("home.starredPlaylistsCount.a11y", {
-                            count: staredSheets.length,
+                            count: starredSheetsCount,
                         })}
-                        onPress={() => {
-                            setIndex(1);
-                        }}>
+                        onPress={() => onSelectTab(1)}>
                         <ThemeText
-                            fontSize="title"
                             accessible={false}
-                            fontWeight={index === 1 ? "bold" : "medium"}
+                            fontSize="title"
+                            fontWeight={selectedTab === 1 ? "bold" : "medium"}
                             style={styles.tabText}>
                             {t("home.starredPlaylists")}
                         </ThemeText>
                         <ThemeText
+                            accessible={false}
                             fontColor="textSecondary"
                             fontSize="subTitle"
-                            accessible={false}
                             style={styles.tabText}>
-                            {" "}
-                        ({staredSheets.length})
+                            {` (${starredSheetsCount})`}
                         </ThemeText>
                     </Pressable>
                 </View>
             </View>
+        </>
+    );
+}
+
+interface SheetRowProps {
+    sheet: HomeSheetItem;
+    onOpen: (sheet: HomeSheetItem) => void;
+}
+
+export function SheetRow({ sheet, onOpen }: SheetRowProps) {
+    const colors = useColors();
+    const { t } = useI18N();
+    const isLocalSheet = isLocalHomeSheet(sheet);
+
+    return (
+        <View
+            style={[
+                styles.sheetCard,
+                {
+                    backgroundColor: colors.card,
+                    borderColor: Color(colors.text).alpha(0.05).toString(),
+                },
+            ]}>
+            <ListItem
+                heightType="big"
+                withHorizontalPadding
+                onPress={() => onOpen(sheet)}>
+                <ListItem.ListItemImage
+                    uri={sheet.coverImg ?? sheet.artwork}
+                    fallbackImg={ImgAsset.albumDefault}
+                    maskIcon={sheet.id === MusicSheet.defaultSheet.id ? "heart" : null}
+                />
+                <ListItem.Content
+                    title={sheet.title}
+                    description={
+                        isLocalSheet
+                            ? t("home.songCount", { count: sheet.worksNum })
+                            : `${sheet.artist ?? ""}`
+                    }
+                />
+                {sheet.id !== MusicSheet.defaultSheet.id ? (
+                    <ListItem.ListItemIcon
+                        position="right"
+                        icon="trash-outline"
+                        onPress={() => {
+                            showDialog("SimpleDialog", {
+                                title: t("dialog.deleteSheetTitle"),
+                                content: t("dialog.deleteSheetContent", {
+                                    name: sheet.title,
+                                }),
+                                onOk: async () => {
+                                    if (isLocalSheet) {
+                                        await MusicSheet.removeSheet(sheet.id);
+                                        Toast.success(t("toast.deleteSuccess"));
+                                    } else {
+                                        await MusicSheet.unstarMusicSheet(sheet);
+                                        Toast.success(t("toast.hasUnstarred"));
+                                    }
+                                },
+                            });
+                        }}
+                    />
+                ) : null}
+            </ListItem>
+        </View>
+    );
+}
+
+export default function Sheets() {
+    const model = useSheetSectionModel();
+    const navigate = useNavigate();
+    const openSheet = useCallback(
+        (sheet: HomeSheetItem) => navigateToHomeSheet(navigate, sheet),
+        [navigate],
+    );
+
+    return (
+        <>
+            <SheetSectionHeader
+                selectedTab={model.selectedTab}
+                onSelectTab={model.setSelectedTab}
+                allSheetsCount={model.allSheetsCount}
+                starredSheetsCount={model.starredSheetsCount}
+            />
             <FlashList
                 ListEmptyComponent={<Empty />}
-                contentContainerStyle={styles.listContent}
-                extraData={{ t }}
-                data={(index === 0 ? allSheets : staredSheets) ?? []}
+                data={model.data}
                 estimatedItemSize={ListItem.Size.big}
-                renderItem={({ item: sheet }) => {
-                    const isLocalSheet = !(
-                        sheet.platform && sheet.platform !== localPluginPlatform
-                    );
-
-
-                    return (
-                        <View
-                            key={`${sheet.id}`}
-                            style={[
-                                styles.sheetCard,
-                                {
-                                    backgroundColor: colors.card,
-                                    borderColor: Color(colors.text)
-                                        .alpha(0.05)
-                                        .toString(),
-                                },
-                            ]}>
-                            <ListItem
-                                heightType="big"
-                                withHorizontalPadding
-                                onPress={() => {
-                                    if (isLocalSheet) {
-                                        navigate(ROUTE_PATH.LOCAL_SHEET_DETAIL, {
-                                            id: sheet.id,
-                                        });
-                                    } else {
-                                        navigate(ROUTE_PATH.PLUGIN_SHEET_DETAIL, {
-                                            sheetInfo: sheet,
-                                        });
-                                    }
-                                }}>
-                                <ListItem.ListItemImage
-                                    uri={sheet.coverImg ?? sheet.artwork}
-                                    fallbackImg={ImgAsset.albumDefault}
-                                    maskIcon={
-                                        sheet.id === MusicSheet.defaultSheet.id
-                                            ? "heart"
-                                            : null
-                                    }
-                                />
-                                <ListItem.Content
-                                    title={sheet.title}
-                                    description={
-                                        isLocalSheet
-                                            ? t("home.songCount", { count: sheet.worksNum })
-                                            : `${sheet.artist ?? ""}`
-                                    }
-                                />
-                                {sheet.id !== MusicSheet.defaultSheet.id ? (
-                                    <ListItem.ListItemIcon
-                                        position="right"
-                                        icon="trash-outline"
-                                        onPress={() => {
-                                            showDialog("SimpleDialog", {
-                                                title: t("dialog.deleteSheetTitle"),
-                                                content: t("dialog.deleteSheetContent", {
-                                                    name: sheet.title,
-                                                }),
-                                                onOk: async () => {
-                                                    if (isLocalSheet) {
-                                                        await MusicSheet.removeSheet(
-                                                            sheet.id,
-                                                        );
-                                                        Toast.success(t("toast.deleteSuccess"));
-                                                    } else {
-                                                        await MusicSheet.unstarMusicSheet(
-                                                            sheet,
-                                                        );
-                                                        Toast.success(t("toast.hasUnstarred"));
-                                                    }
-                                                },
-                                            });
-                                        }}
-                                    />
-                                ) : null}
-                            </ListItem>
-                        </View>
-                    );
-                }}
-                nestedScrollEnabled
+                keyExtractor={getHomeSheetKey}
+                renderItem={({ item }) => (
+                    <SheetRow sheet={item} onOpen={openSheet} />
+                )}
             />
         </>
     );
@@ -238,13 +286,12 @@ const styles = StyleSheet.create({
         borderRadius: rpx(19),
         alignItems: "center",
     },
-
     tabText: {
         lineHeight: rpx(48),
     },
     selectTab: {
         shadowColor: "#000",
-        shadowOpacity: 0.10,
+        shadowOpacity: 0.1,
         shadowRadius: rpx(8),
         shadowOffset: { width: 0, height: rpx(3) },
         elevation: 2,
@@ -260,10 +307,8 @@ const styles = StyleSheet.create({
     newSheetButton: {
         marginRight: rpx(24),
     },
-    listContent: {
-        paddingHorizontal: rpx(28),
-    },
     sheetCard: {
+        marginHorizontal: rpx(28),
         marginBottom: rpx(14),
         borderRadius: rpx(26),
         borderWidth: StyleSheet.hairlineWidth,

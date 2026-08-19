@@ -1,5 +1,5 @@
 import { useAppConfig } from "@/core/appConfig";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Theme from "@/core/theme";
 import useCheckUpdate from "@/hooks/useCheckUpdate";
 import { useListenOrientationChange } from "@/hooks/useOrientation";
@@ -22,14 +22,17 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import rpx from "@/utils/rpx";
-
-// 启动动画只做短暂的视觉承接。初始化任务（尤其是第三方插件）不应阻塞首页交互。
-const MAX_VISUAL_LAUNCH_DURATION = 1200;
+import {
+    launchHandoffAtom,
+    notifyAppSurfaceReady,
+    requestHomeHandoff,
+    startLaunchHandoff,
+} from "./launchHandoff";
 
 export function BootstrapComponent() {
     const bootstrapState = useAtomValue(bootstrapAtom);
+    const launchPhase = useAtomValue(launchHandoffAtom);
     const pulse = useSharedValue(0);
-    const [showLaunchOverlay, setShowLaunchOverlay] = useState(true);
 
     useListenOrientationChange();
     useCheckUpdate();
@@ -37,6 +40,10 @@ export function BootstrapComponent() {
     const followSystem = useAppConfig("theme.followSystem");
 
     const colorScheme = useColorScheme();
+
+    useEffect(() => {
+        startLaunchHandoff();
+    }, []);
 
     useEffect(() => {
         if (followSystem) {
@@ -87,7 +94,7 @@ export function BootstrapComponent() {
     }, [bootstrapState]);
 
     useEffect(() => {
-        if (bootstrapState.state === "Loading") {
+        if (bootstrapState.state === "Loading" && launchPhase !== "HOME") {
             pulse.value = withRepeat(
                 withSequence(
                     withTiming(1, {
@@ -106,20 +113,12 @@ export function BootstrapComponent() {
             cancelAnimation(pulse);
         }
         return () => cancelAnimation(pulse);
-    }, [bootstrapState.state, pulse]);
+    }, [bootstrapState.state, launchPhase, pulse]);
 
     useEffect(() => {
         if (bootstrapState.state !== "Loading") {
-            setShowLaunchOverlay(false);
-            return;
+            requestHomeHandoff();
         }
-
-        // 插件初始化可能受网络或第三方脚本影响而变慢；此时仍应允许用户使用已加载的界面。
-        const dismissTimer = setTimeout(() => {
-            setShowLaunchOverlay(false);
-        }, MAX_VISUAL_LAUNCH_DURATION);
-
-        return () => clearTimeout(dismissTimer);
     }, [bootstrapState.state]);
 
     const logoStyle = useAnimatedStyle(() => ({
@@ -127,7 +126,7 @@ export function BootstrapComponent() {
         transform: [{ scale: 0.94 + pulse.value * 0.06 }],
     }));
 
-    if (bootstrapState.state !== "Loading" || !showLaunchOverlay) {
+    if (launchPhase === "HOME") {
         return null;
     }
 
@@ -139,8 +138,16 @@ export function BootstrapComponent() {
             accessible={false}
             style={styles.launchOverlay}>
             <View style={styles.launchContent}>
-                <Animated.View style={[styles.logoShadow, logoStyle]}>
-                    <Image source={ImgAsset.logo} style={styles.logo} />
+                <Animated.View style={[styles.logoStage, logoStyle]}>
+                    <View style={styles.logoDecoration} />
+                    <View style={styles.logoSafeArea}>
+                        <Image
+                            source={ImgAsset.logo}
+                            resizeMode="contain"
+                            onLoad={notifyAppSurfaceReady}
+                            style={styles.logo}
+                        />
+                    </View>
                 </Animated.View>
                 <ThemeText
                     color="rgba(255,255,255,0.72)"
@@ -168,20 +175,34 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         transform: [{ translateY: rpx(-18) }],
     },
-    logoShadow: {
+    // The 12rpx transparent inset keeps the complete 174rpx brand layer inside
+    // the animated 198rpx square even at the existing maximum scale of 1.
+    logoStage: {
+        width: rpx(198),
+        height: rpx(198),
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    logoDecoration: {
+        position: "absolute",
         width: rpx(174),
         height: rpx(174),
         borderRadius: rpx(50),
+        backgroundColor: "#1B1F20",
         shadowColor: "#F1745E",
         shadowOpacity: 0.30,
         shadowRadius: rpx(34),
         shadowOffset: { width: 0, height: 0 },
         elevation: 14,
     },
+    logoSafeArea: {
+        width: "100%",
+        height: "100%",
+        padding: rpx(12),
+    },
     logo: {
         width: "100%",
         height: "100%",
-        borderRadius: rpx(50),
     },
     launchText: {
         marginTop: rpx(34),
