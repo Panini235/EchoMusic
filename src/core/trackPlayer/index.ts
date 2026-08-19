@@ -173,7 +173,12 @@ class TrackPlayer extends EventEmitter<{
             }
             const generation = beginPlayRequest();
             this.setCurrentMusic(track);
-            void this.restoreTrackSource(track, quality, generation, progress);
+            void this.restoreTrackSource(
+                track,
+                quality,
+                generation,
+                progress ?? undefined,
+            );
         }
 
         if (!this.serviceInited) {
