@@ -59,9 +59,10 @@ export default function Operations({ navigate: navigateFromHome }: OperationsPro
                 {t("home.quickAccess")}
             </ThemeText>
             <View style={styles.container}>
-                {actionButtons.map(action => (
+                {actionButtons.map((action, index) => (
                     <ActionButton
                         style={styles.actionButtonStyle}
+                        delay={80 + index * 45}
                         key={action.id}
                         {...action}
                     />
