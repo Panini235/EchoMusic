@@ -17,6 +17,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.modules.core.PermissionAwareActivity
+import com.facebook.react.modules.core.PermissionListener
 import kotlin.system.exitProcess
 
 class UtilsModule(context: ReactApplicationContext) : ReactContextBaseJavaModule(context) {
@@ -35,13 +37,50 @@ class UtilsModule(context: ReactApplicationContext) : ReactContextBaseJavaModule
 
     @ReactMethod
     fun checkStoragePermission(promise: Promise) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasAllFilesAccess = Environment.isExternalStorageManager()
+            val hasAudioReadPermission = ContextCompat.checkSelfPermission(
+                reactContext,
+                Manifest.permission.READ_MEDIA_AUDIO,
+            ) == PackageManager.PERMISSION_GRANTED
+            promise.resolve(hasAllFilesAccess || hasAudioReadPermission)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             promise.resolve(Environment.isExternalStorageManager())
         } else {
             val readPermission = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
             val writePermission = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
             promise.resolve(readPermission && writePermission)
         }
+    }
+
+    @ReactMethod
+    fun requestAudioReadPermission(promise: Promise) {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_AUDIO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        if (ContextCompat.checkSelfPermission(reactContext, permission) == PackageManager.PERMISSION_GRANTED) {
+            promise.resolve(true)
+            return
+        }
+
+        val activity = reactContext.currentActivity as? PermissionAwareActivity
+        if (activity == null) {
+            promise.resolve(false)
+            return
+        }
+        activity.requestPermissions(
+            arrayOf(permission),
+            4_001,
+            PermissionListener { _, _, grantResults ->
+                promise.resolve(
+                    grantResults.isNotEmpty() &&
+                        grantResults.all { it == PackageManager.PERMISSION_GRANTED },
+                )
+                true
+            },
+        )
     }
 
     @ReactMethod

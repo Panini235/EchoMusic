@@ -76,6 +76,7 @@ interface RouterParams extends RouterParamsBase {
     "search-music-list": {
         musicList: IMusic.IMusicItem[] | null;
         musicSheet?: IMusic.IMusicSheetItem;
+        isLocalMusicSearch?: boolean;
     };
     "music-list-editor": {
         musicSheet?: Partial<IMusic.IMusicSheetItem>;

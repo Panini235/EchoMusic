@@ -5,7 +5,11 @@ import { IInjectable } from "@/types/infra";
 import { addFileScheme, escapeCharacter, mkdirR } from "@/utils/fileUtils";
 import { errorLog } from "@/utils/log";
 import { patchMediaExtra } from "@/utils/mediaExtra";
-import { getMediaUniqueKey, isSameMediaItem } from "@/utils/mediaUtils";
+import {
+    getMediaUniqueKey,
+    invalidateDownloadDirCache,
+    isSameMediaItem,
+} from "@/utils/mediaUtils";
 import network from "@/utils/network";
 import { getQualityOrder } from "@/utils/qualities";
 import EventEmitter from "eventemitter3";
@@ -326,6 +330,7 @@ class Downloader extends EventEmitter<IEvents> implements IInjectable {
             await promise;
             // 下载完成，移动文件
             await copyFile(cacheDownloadPath, targetDownloadPath);
+            invalidateDownloadDirCache();
 
             LocalMusicSheet.addMusic({
                 ...musicItem,

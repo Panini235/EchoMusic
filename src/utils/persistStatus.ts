@@ -2,6 +2,7 @@
  * 全局持久化的状态
  */
 
+import { SortType } from "@/constants/commonConst";
 import getOrCreateMMKV from "@/utils/getOrCreateMMKV";
 import { useEffect, useState } from "react";
 import { safeParse } from "./jsonUtil";
@@ -36,6 +37,8 @@ interface IPersistStatus {
     "lyric.showTranslation": boolean;
     /** 歌词-详情页字体大小 */
     "lyric.detailFontSize": number;
+    /** 本地音乐列表排序 */
+    "localMusic.sort": SortType;
 }
 
 function set<K extends keyof IPersistStatus>(

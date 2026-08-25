@@ -430,6 +430,36 @@ class MusicSheetClazz implements IInjectable {
     }
 
 
+    async replaceMusic(
+        sheetId: string,
+        originalMusicItem: IMusic.IMusicItem,
+        replacementMusicItem: IMusic.IMusicItem,
+    ) {
+        const musicList = this.getSortedMusicListBySheetId(sheetId);
+        const original = musicList.musicList.find(item =>
+            isSameMediaItem(item, originalMusicItem),
+        );
+        if (!original) {
+            return false;
+        }
+
+        const replaced = musicList.replace(originalMusicItem, {
+            ...replacementMusicItem,
+            $timestamp: original.$timestamp,
+            $sortIndex: original.$sortIndex,
+        });
+        if (!replaced) {
+            return false;
+        }
+
+        await storage.setMusicList(sheetId, musicList.musicList);
+        ee.emit("UpdateMusicList", {
+            sheetId,
+            updateType: "resort",
+        });
+        return true;
+    }
+
     async setSortType(sheetId: string, sortType: SortType) {
         const musicList = this.getSortedMusicListBySheetId(sheetId);
         musicList.setSortType(sortType);
