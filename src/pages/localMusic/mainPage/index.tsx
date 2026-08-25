@@ -23,6 +23,7 @@ export default function MainPage() {
                         onPress() {
                             navigate(ROUTE_PATH.SEARCH_MUSIC_LIST, {
                                 musicList: LocalMusicSheet.getMusicList(),
+                                isLocalMusicSearch: true,
                             });
                         },
                     },

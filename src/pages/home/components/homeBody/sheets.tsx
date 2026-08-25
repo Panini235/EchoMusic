@@ -1,4 +1,6 @@
 import Empty from "@/components/base/empty";
+import FastImage from "@/components/base/fastImage";
+import Icon from "@/components/base/icon";
 import IconButton from "@/components/base/iconButton";
 import ListItem from "@/components/base/listItem";
 import ThemeText from "@/components/base/themeText";
@@ -230,6 +232,107 @@ export function SheetRow({ sheet, onOpen }: SheetRowProps) {
     );
 }
 
+interface HomeSheetCardProps {
+    sheet: HomeSheetItem;
+    onOpen: (sheet: HomeSheetItem) => void;
+    column: "left" | "right";
+}
+
+export function HomeSheetCard({
+    sheet,
+    onOpen,
+    column,
+}: HomeSheetCardProps) {
+    const colors = useColors();
+    const { t } = useI18N();
+    const isLocalSheet = isLocalHomeSheet(sheet);
+    const isDefaultSheet = sheet.id === MusicSheet.defaultSheet.id;
+    const description = isLocalSheet
+        ? t("home.songCount", { count: sheet.worksNum })
+        : sheet.artist ?? "";
+
+    const removeSheet = () => {
+        showDialog("SimpleDialog", {
+            title: t("dialog.deleteSheetTitle"),
+            content: t("dialog.deleteSheetContent", { name: sheet.title }),
+            onOk: async () => {
+                if (isLocalSheet) {
+                    await MusicSheet.removeSheet(sheet.id);
+                    Toast.success(t("toast.deleteSuccess"));
+                } else {
+                    await MusicSheet.unstarMusicSheet(sheet);
+                    Toast.success(t("toast.hasUnstarred"));
+                }
+            },
+        });
+    };
+
+    return (
+        <View
+            style={[
+                styles.homeSheetGridItem,
+                column === "left"
+                    ? styles.homeSheetGridItemLeft
+                    : styles.homeSheetGridItemRight,
+            ]}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${sheet.title}, ${description}`}
+                onPress={() => onOpen(sheet)}
+                onLongPress={isDefaultSheet ? undefined : removeSheet}
+                style={({ pressed }) => [
+                    styles.homeSheetPressable,
+                    {
+                        backgroundColor: colors.card,
+                        borderColor: Color(colors.text).alpha(0.05).toString(),
+                    },
+                    pressed ? styles.homeSheetPressed : null,
+                ]}>
+                <View style={styles.homeSheetArtwork}>
+                    <FastImage
+                        style={styles.homeSheetArtworkImage}
+                        source={sheet.coverImg ?? sheet.artwork}
+                        placeholderSource={ImgAsset.albumDefault}
+                    />
+                    {isDefaultSheet ? (
+                        <View style={styles.defaultSheetBadge} pointerEvents="none">
+                            <Icon name="heart" size={rpx(30)} color="#FFFFFF" />
+                        </View>
+                    ) : null}
+                </View>
+                <View style={styles.homeSheetInfo}>
+                    <ThemeText
+                        fontSize="subTitle"
+                        fontWeight="semibold"
+                        numberOfLines={1}>
+                        {sheet.title}
+                    </ThemeText>
+                    <ThemeText
+                        fontSize="description"
+                        fontColor="textSecondary"
+                        numberOfLines={1}
+                        style={styles.homeSheetDescription}>
+                        {description}
+                    </ThemeText>
+                </View>
+            </Pressable>
+            {!isDefaultSheet ? (
+                <IconButton
+                    name="trash-outline"
+                    sizeType="light"
+                    color={colors.textSecondary}
+                    accessibilityLabel={t("dialog.deleteSheetTitle")}
+                    onPress={removeSheet}
+                    style={[
+                        styles.homeSheetAction,
+                        { backgroundColor: Color(colors.card).alpha(0.88).toString() },
+                    ]}
+                />
+            ) : null}
+        </View>
+    );
+}
+
 export default function Sheets() {
     const model = useSheetSectionModel();
     const navigate = useNavigate();
@@ -306,6 +409,67 @@ const styles = StyleSheet.create({
     },
     newSheetButton: {
         marginRight: rpx(24),
+    },
+    homeSheetGridItem: {
+        flex: 1,
+        minWidth: 0,
+        marginBottom: rpx(18),
+        position: "relative",
+    },
+    homeSheetGridItemLeft: {
+        marginLeft: rpx(28),
+        marginRight: rpx(8),
+    },
+    homeSheetGridItemRight: {
+        marginLeft: rpx(8),
+        marginRight: rpx(28),
+    },
+    homeSheetPressable: {
+        minHeight: rpx(284),
+        borderRadius: rpx(28),
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: "hidden",
+    },
+    homeSheetArtwork: {
+        height: rpx(172),
+        backgroundColor: "rgba(0, 0, 0, 0.08)",
+    },
+    homeSheetArtworkImage: {
+        width: "100%",
+        height: "100%",
+    },
+    defaultSheetBadge: {
+        position: "absolute",
+        top: rpx(14),
+        left: rpx(14),
+        width: rpx(52),
+        height: rpx(52),
+        borderRadius: rpx(26),
+        backgroundColor: "rgba(214, 65, 75, 0.88)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    homeSheetInfo: {
+        flex: 1,
+        paddingHorizontal: rpx(18),
+        paddingTop: rpx(16),
+        paddingBottom: rpx(14),
+        justifyContent: "center",
+    },
+    homeSheetDescription: {
+        marginTop: rpx(6),
+    },
+    homeSheetAction: {
+        position: "absolute",
+        top: rpx(10),
+        right: rpx(10),
+        minWidth: rpx(52),
+        minHeight: rpx(52),
+        borderRadius: rpx(18),
+    },
+    homeSheetPressed: {
+        opacity: 0.72,
+        transform: [{ scale: 0.97 }],
     },
     sheetCard: {
         marginHorizontal: rpx(28),

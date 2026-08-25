@@ -1,9 +1,8 @@
 import Empty from "@/components/base/empty";
-import ListItem from "@/components/base/listItem";
 import globalStyle from "@/constants/globalStyle";
-import MusicSheet from "@/core/musicSheet";
-import { ROUTE_PATH, useNavigate } from "@/core/router";
+import { useNavigate } from "@/core/router";
 import useHomeNavigationLatch from "@/pages/home/hooks/useHomeNavigationLatch";
+import rpx from "@/utils/rpx";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback } from "react";
 import { StyleSheet } from "react-native";
@@ -12,10 +11,9 @@ import Operations from "./operations";
 import RecentlyPlayed from "./recentlyPlayed";
 import {
     getHomeSheetKey,
+    HomeSheetCard,
     HomeSheetItem,
-    isLocalHomeSheet,
     navigateToHomeSheet,
-    SheetRow,
     SheetSectionHeader,
     useSheetSectionModel,
 } from "./sheets";
@@ -25,18 +23,8 @@ export default function HomeBody() {
     const navigate = useNavigate();
     const guardedNavigate = useHomeNavigationLatch();
     const openSheet = useCallback(
-        (sheet: HomeSheetItem) => {
-            if (
-                isLocalHomeSheet(sheet) &&
-                sheet.id === MusicSheet.defaultSheet.id
-            ) {
-                guardedNavigate(ROUTE_PATH.LOCAL_SHEET_DETAIL, { id: sheet.id });
-                return;
-            }
-
-            navigateToHomeSheet(navigate, sheet);
-        },
-        [guardedNavigate, navigate],
+        (sheet: HomeSheetItem) => navigateToHomeSheet(navigate, sheet),
+        [navigate],
     );
 
     return (
@@ -45,7 +33,8 @@ export default function HomeBody() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
             data={model.data}
-            estimatedItemSize={ListItem.Size.big}
+            estimatedItemSize={rpx(284)}
+            numColumns={2}
             keyExtractor={getHomeSheetKey}
             ListEmptyComponent={<Empty />}
             ListHeaderComponent={
@@ -61,8 +50,12 @@ export default function HomeBody() {
                 </>
             }
             ListFooterComponent={<Operations navigate={guardedNavigate} />}
-            renderItem={({ item }) => (
-                <SheetRow sheet={item} onOpen={openSheet} />
+            renderItem={({ item, index }) => (
+                <HomeSheetCard
+                    sheet={item}
+                    onOpen={openSheet}
+                    column={index % 2 === 0 ? "left" : "right"}
+                />
             )}
         />
     );
