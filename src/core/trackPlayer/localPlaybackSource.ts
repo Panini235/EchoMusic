@@ -1,4 +1,4 @@
-import { getLocalPath } from "@/utils/mediaUtils";
+import { getLocalPathWithFallback } from "@/utils/mediaUtils";
 import {
     EncodingType,
     getInfoAsync,
@@ -35,7 +35,7 @@ export async function resolveCompleteLocalPlaybackSource(
     mediaItem: ICommon.IMediaBase,
     isFresh: () => boolean,
 ): Promise<CompleteLocalPlaybackSource | null> {
-    const candidate = getLocalPath(mediaItem);
+    const candidate = await getLocalPathWithFallback(mediaItem);
     const playbackUri = candidate ? normalizeLocalUri(candidate) : null;
     if (!playbackUri || !isFresh()) {
         return null;

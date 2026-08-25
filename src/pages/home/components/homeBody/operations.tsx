@@ -61,6 +61,7 @@ export default function Operations({ navigate: navigateFromHome }: OperationsPro
             <View style={styles.container}>
                 {actionButtons.map((action, index) => (
                     <ActionButton
+                        variant="compact"
                         style={styles.actionButtonStyle}
                         delay={80 + index * 45}
                         key={action.id}
@@ -74,22 +75,25 @@ export default function Operations({ navigate: navigateFromHome }: OperationsPro
 
 const styles = StyleSheet.create({
     section: {
-        marginTop: rpx(40),
+        marginTop: rpx(30),
     },
     title: {
         marginHorizontal: rpx(28),
-        marginBottom: rpx(18),
+        marginBottom: rpx(16),
+        textAlign: "center",
     },
     container: {
         width: "100%",
         paddingHorizontal: rpx(28),
-        marginBottom: rpx(22),
+        marginBottom: rpx(8),
         flexDirection: "row",
-        gap: rpx(16),
+        justifyContent: "center",
+        alignItems: "center",
+        gap: rpx(14),
     },
     actionButtonStyle: {
         flex: 1,
         minWidth: 0,
-        height: rpx(142),
+        height: rpx(118),
     },
 });

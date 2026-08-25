@@ -142,7 +142,7 @@ export function BootstrapComponent() {
                     <View style={styles.logoDecoration} />
                     <View style={styles.logoSafeArea}>
                         <Image
-                            source={ImgAsset.logo}
+                            source={ImgAsset.logoTransparent}
                             resizeMode="contain"
                             onLoad={notifyAppSurfaceReady}
                             style={styles.logo}

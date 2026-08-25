@@ -4,7 +4,7 @@ import {
     supportLocalMediaType,
 } from "@/constants/commonConst";
 import mp3Util, { IBasicMeta } from "@/native/mp3Util";
-import { addFileScheme, getFileName } from "@/utils/fileUtils.ts";
+import { getFileName } from "@/utils/fileUtils.ts";
 import {
     getLocalPath,
     isSameMediaItem,
@@ -157,10 +157,13 @@ function cancelImportLocal() {
 // 导入本地音乐
 const groupNum = 25;
 async function importLocal(_folderPaths: string[]) {
-    const folderPaths = [..._folderPaths.map(it => addFileScheme(it))];
+    const folderPaths = [..._folderPaths];
     const { musicList, token } = await getMusicStats(folderPaths);
     if (token !== importToken) {
         throw new Error("Import Broken");
+    }
+    if (musicList.length === 0) {
+        throw new Error("NO_LOCAL_MEDIA_FOUND");
     }
     // 分组请求，不然序列化可能出问题
     let metas: IBasicMeta[] = [];
@@ -201,7 +204,7 @@ async function importLocal(_folderPaths: string[]) {
     if (token !== importToken) {
         throw new Error("Import Broken");
     }
-    addMusic(musicItems);
+    await addMusic(musicItems);
 }
 
 /** 是否为本地音乐 */

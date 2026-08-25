@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import rpx from "@/utils/rpx";
 import ListItem from "@/components/base/listItem";
@@ -6,7 +6,7 @@ import ThemeText from "@/components/base/themeText";
 import { ImgAsset } from "@/constants/assetsConst";
 import Clipboard from "@react-native-clipboard/clipboard";
 
-import { getMediaUniqueKey } from "@/utils/mediaUtils";
+import { getLocalPathWithFallback, getMediaUniqueKey } from "@/utils/mediaUtils";
 import FastImage from "@/components/base/fastImage";
 import Toast from "@/utils/toast";
 import LocalMusicSheet from "@/core/localMusicSheet";
@@ -46,6 +46,7 @@ const ITEM_HEIGHT = rpx(96);
 interface IOption {
     icon: IIconName;
     title: string;
+    description?: string;
     onPress?: () => void;
     show?: boolean;
 }
@@ -58,6 +59,19 @@ export default function MusicItemOptions(props: IMusicItemOptionsProps) {
 
     const downloaded = LocalMusicSheet.isLocalMusic(musicItem);
     const associatedLrc = getMediaExtraProperty(musicItem, "associatedLrc");
+    const [localPath, setLocalPath] = useState<string | null>(null);
+
+    useEffect(() => {
+        let active = true;
+        void getLocalPathWithFallback(musicItem).then(path => {
+            if (active) {
+                setLocalPath(path);
+            }
+        });
+        return () => {
+            active = false;
+        };
+    }, [musicItem]);
 
     const options: IOption[] = [
         {
@@ -104,6 +118,16 @@ export default function MusicItemOptions(props: IMusicItemOptionsProps) {
             },
         },
         {
+            icon: "folder-outline",
+            title: t("panel.musicItemOptions.localPath"),
+            description: localPath ?? undefined,
+            show: !!localPath,
+            onPress: () => {
+                Clipboard.setString(localPath!);
+                Toast.success(t("toast.copiedToClipboard"));
+            },
+        },
+        {
             icon: "motion-play",
             title: t("musicListEditor.addToNextPlay"),
             onPress: () => {
@@ -119,17 +143,20 @@ export default function MusicItemOptions(props: IMusicItemOptionsProps) {
             },
         },
         {
+            icon: "arrows-left-right",
+            title: t("panel.musicItemOptions.switchSource"),
+            onPress: () => {
+                showPanel("SwitchSource", { musicItem, musicSheet });
+            },
+        },
+        {
             icon: "arrow-down-tray",
-            title: t("common.download"),
+            title: t("panel.musicItemOptions.downloadToConfiguredFolder"),
             show: !downloaded,
-            onPress: async () => {
-                showPanel("MusicQuality", {
-                    musicItem,
-                    type: "download",
-                    async onQualityPress(quality) {
-                        downloader.download(musicItem, quality);
-                    },
-                });
+            onPress: () => {
+                downloader.download(musicItem);
+                Toast.success(t("toast.beginDownload"));
+                hidePanel();
             },
         },
         {
@@ -284,7 +311,10 @@ export default function MusicItemOptions(props: IMusicItemOptionsProps) {
                                             icon={item.icon}
                                             iconSize={iconSizeConst.light}
                                         />
-                                        <ListItem.Content title={item.title} />
+                                        <ListItem.Content
+                                            title={item.title}
+                                            description={item.description}
+                                        />
                                     </ListItem>
                                 ) : null
                             }

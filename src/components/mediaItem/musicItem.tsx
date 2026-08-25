@@ -20,8 +20,21 @@ interface IMusicItemProps {
     itemPaddingRight?: number;
     left?: () => JSX.Element;
     containerStyle?: StyleProp<ViewStyle>;
-    highlight?: boolean
+    highlight?: boolean;
 }
+
+function formatDuration(rawDuration: number) {
+    const duration = Math.floor(Number(rawDuration));
+    if (!Number.isFinite(duration) || duration <= 0) {
+        return null;
+    }
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    const minutePart = hours ? `${minutes}`.padStart(2, "0") : `${minutes}`;
+    return `${hours ? `${hours}:` : ""}${minutePart}:${`${seconds}`.padStart(2, "0")}`;
+}
+
 export default function MusicItem(props: IMusicItemProps) {
     const {
         musicItem,
@@ -35,6 +48,7 @@ export default function MusicItem(props: IMusicItemProps) {
         containerStyle,
         highlight = false,
     } = props;
+    const duration = formatDuration(musicItem.duration);
 
     return (
         <ListItem
@@ -63,29 +77,16 @@ export default function MusicItem(props: IMusicItemProps) {
                 </ListItem.ListItemText>
             ) : null}
             <ListItem.Content
-                title={
-                    <TitleAndTag
-                        title={musicItem.title}
-                        titleFontColor={highlight ? "primary": "text"}
-                        tag={musicItem.platform}
-                    />
-                }
+                title={<TitleAndTag title={musicItem.title} titleFontColor={highlight ? "primary" : "text"} tag={musicItem.platform} />}
                 description={
                     <View style={styles.descContainer}>
                         {LocalMusicSheet.isLocalMusic(musicItem) && (
-                            <Icon
-                                style={styles.icon}
-                                color="#11659a"
-                                name="check-circle"
-                                size={rpx(22)}
-                            />
+                            <Icon style={styles.icon} color="#11659a" name="check-circle" size={rpx(22)} />
                         )}
-                        <ThemeText
-                            numberOfLines={1}
-                            fontSize="description"
-                            fontColor={highlight ? "primary" : "textSecondary"}>
+                        <ThemeText numberOfLines={1} fontSize="description" fontColor={highlight ? "primary" : "textSecondary"}>
                             {musicItem.artist}
                             {musicItem.album ? ` - ${musicItem.album}` : ""}
+                            {duration ? ` · ${duration}` : ""}
                         </ThemeText>
                     </View>
                 }
@@ -95,12 +96,7 @@ export default function MusicItem(props: IMusicItemProps) {
                     width={rpx(48)}
                     position="none"
                     icon="ellipsis-vertical"
-                    onPress={() => {
-                        showPanel("MusicItemOptions", {
-                            musicItem,
-                            musicSheet,
-                        });
-                    }}
+                    onPress={() => showPanel("MusicItemOptions", { musicItem, musicSheet })}
                 />
             ) : null}
         </ListItem>
@@ -108,17 +104,7 @@ export default function MusicItem(props: IMusicItemProps) {
 }
 
 const styles = StyleSheet.create({
-    icon: {
-        marginRight: rpx(6),
-    },
-    descContainer: {
-        flexDirection: "row",
-        marginTop: rpx(16),
-    },
-
-    indexText: {
-        fontStyle: "italic",
-        textAlign: "center",
-        padding: rpx(2),
-    },
+    icon: { marginRight: rpx(6) },
+    descContainer: { flexDirection: "row", marginTop: rpx(16) },
+    indexText: { fontStyle: "italic", textAlign: "center", padding: rpx(2) },
 });

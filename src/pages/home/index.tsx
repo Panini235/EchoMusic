@@ -79,14 +79,14 @@ export default function App() {
             screenOptions={{
                 headerShown: false,
                 drawerType: "front",
-                drawerPosition: "right",
+                drawerPosition: "left",
                 swipeEdgeWidth: rpx(48),
                 overlayColor: Color(colors.text).alpha(0.34).toString(),
                 drawerStyle: {
                     width: "78%",
                     backgroundColor: "transparent",
-                    borderTopLeftRadius: rpx(34),
-                    borderBottomLeftRadius: rpx(34),
+                    borderTopRightRadius: rpx(34),
+                    borderBottomRightRadius: rpx(34),
                     overflow: "hidden",
                 },
             }}

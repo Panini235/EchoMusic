@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Linking, Pressable, StyleSheet, View } from "react-native";
 import rpx from "@/utils/rpx";
 import * as DocumentPicker from "expo-document-picker";
@@ -36,6 +36,60 @@ export default function PluginList() {
     const { t } = useI18N();
 
     const [loading, setLoading] = useState(false);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedHashes, setSelectedHashes] = useState<string[]>([]);
+
+    useEffect(() => {
+        setSelectedHashes(current =>
+            current.filter(hash => plugins.some(plugin => plugin.hash === hash)),
+        );
+    }, [plugins]);
+
+    const selectedCount = selectedHashes.length;
+    const allSelected = plugins.length > 0 && selectedCount === plugins.length;
+
+    const exitSelectionMode = () => {
+        setSelectionMode(false);
+        setSelectedHashes([]);
+    };
+
+    const enterSelectionMode = (hash: string) => {
+        setSelectionMode(true);
+        setSelectedHashes([hash]);
+    };
+
+    const togglePluginSelection = (hash: string) => {
+        setSelectedHashes(current =>
+            current.includes(hash)
+                ? current.filter(currentHash => currentHash !== hash)
+                : [...current, hash],
+        );
+    };
+
+    const toggleSelectAll = () => {
+        setSelectedHashes(allSelected ? [] : plugins.map(plugin => plugin.hash));
+    };
+
+    const confirmBatchUninstall = () => {
+        if (!selectedCount) {
+            return;
+        }
+        showDialog("SimpleDialog", {
+            title: t("pluginSetting.menu.batchUninstall"),
+            content: t("pluginSetting.menu.batchUninstallContent", {
+                count: selectedCount,
+            }),
+            async onOk() {
+                setLoading(true);
+                await Promise.all(
+                    selectedHashes.map(hash => PluginManager.uninstallPlugin(hash)),
+                );
+                setLoading(false);
+                exitSelectionMode();
+                Toast.success(t("toast.pluginUninstalled"));
+            },
+        });
+    };
 
     const navigator = useNavigation<any>();
 
@@ -52,6 +106,14 @@ export default function PluginList() {
             title: t("pluginSetting.menu.sort"),
             onPress() {
                 navigator.navigate("/pluginsetting/sort");
+            },
+        },
+        {
+            icon: "trash-outline",
+            title: t("pluginSetting.menu.batchUninstall"),
+            onPress() {
+                setSelectionMode(true);
+                setSelectedHashes([]);
             },
         },
         {
@@ -269,9 +331,18 @@ export default function PluginList() {
 
     return (
         <>
-            <AppBar menu={menuOptions}>{t("sidebar.pluginManagement")}</AppBar>
+            <AppBar menu={selectionMode ? undefined : menuOptions}>{t("sidebar.pluginManagement")}</AppBar>
             <HorizontalSafeAreaView style={style.wrapper}>
                 <>
+                    {selectionMode ? (
+                        <PluginSelectionToolbar
+                            selectedCount={selectedCount}
+                            allSelected={allSelected}
+                            onCancel={exitSelectionMode}
+                            onToggleSelectAll={toggleSelectAll}
+                            onUninstall={confirmBatchUninstall}
+                        />
+                    ) : null}
                     {loading ? (
                         <Loading />
                     ) : (
@@ -291,50 +362,58 @@ export default function PluginList() {
                             data={plugins ?? []}
                             keyExtractor={_ => _.hash}
                             renderItem={({ item: plugin }) => (
-                                <PluginItem key={plugin.hash} plugin={plugin} />
+                                <PluginItem
+                                    plugin={plugin}
+                                    selectionMode={selectionMode}
+                                    selected={selectedHashes.includes(plugin.hash)}
+                                    onEnterSelectionMode={enterSelectionMode}
+                                    onSelectionChange={togglePluginSelection}
+                                />
                             )}
                         />
                     )}
 
-                    <Fab
-                        icon="plus"
-                        onPress={() => {
-                            showPanel("SimpleSelect", {
-                                header: t("pluginSetting.menu.installPlugin"),
-                                candidates: [
-                                    {
-                                        value: "从本地安装插件",
-                                        title: t("pluginSetting.fabOptions.installFromLocal"),
+                    {!selectionMode ? (
+                        <Fab
+                            icon="plus"
+                            onPress={() => {
+                                showPanel("SimpleSelect", {
+                                    header: t("pluginSetting.menu.installPlugin"),
+                                    candidates: [
+                                        {
+                                            value: "从本地安装插件",
+                                            title: t("pluginSetting.fabOptions.installFromLocal"),
+                                        },
+                                        {
+                                            value: "从网络安装插件",
+                                            title: t("pluginSetting.fabOptions.installFromNetwork"),
+                                        },
+                                        {
+                                            value: "更新全部插件",
+                                            title: t("pluginSetting.fabOptions.updateAllPlugins"),
+                                        },
+                                        {
+                                            value: "更新订阅",
+                                            title: t("pluginSetting.fabOptions.updateSubscription"),
+                                        },
+                                    ],
+                                    onPress(item) {
+                                        if (item.value === "从本地安装插件") {
+                                            onInstallFromLocalClick();
+                                        } else if (
+                                            item.value === "从网络安装插件"
+                                        ) {
+                                            onInstallFromNetworkClick();
+                                        } else if (item.value === "更新订阅") {
+                                            onSubscribeClick();
+                                        } else if (item.value === "更新全部插件") {
+                                            onUpdateAllClick();
+                                        }
                                     },
-                                    {
-                                        value: "从网络安装插件",
-                                        title: t("pluginSetting.fabOptions.installFromNetwork"),
-                                    },
-                                    {
-                                        value: "更新全部插件",
-                                        title: t("pluginSetting.fabOptions.updateAllPlugins"),
-                                    },
-                                    {
-                                        value: "更新订阅",
-                                        title: t("pluginSetting.fabOptions.updateSubscription"),
-                                    },
-                                ],
-                                onPress(item) {
-                                    if (item.value === "从本地安装插件") {
-                                        onInstallFromLocalClick();
-                                    } else if (
-                                        item.value === "从网络安装插件"
-                                    ) {
-                                        onInstallFromNetworkClick();
-                                    } else if (item.value === "更新订阅") {
-                                        onSubscribeClick();
-                                    } else if (item.value === "更新全部插件") {
-                                        onUpdateAllClick();
-                                    }
-                                },
-                            });
-                        }}
-                    />
+                                });
+                            }}
+                        />
+                    ) : null}
                 </>
             </HorizontalSafeAreaView>
         </>
@@ -370,6 +449,82 @@ function PluginSummary({ count }: { count: number }) {
                 </ThemeText>
             </View>
             <View style={style.liveDot} />
+        </View>
+    );
+}
+
+function PluginSelectionToolbar(props: {
+    selectedCount: number;
+    allSelected: boolean;
+    onCancel: () => void;
+    onToggleSelectAll: () => void;
+    onUninstall: () => void;
+}) {
+    const { selectedCount, allSelected, onCancel, onToggleSelectAll, onUninstall } = props;
+    const colors = useColors();
+    const { t } = useI18N();
+
+    return (
+        <View
+            style={[
+                style.selectionToolbar,
+                {
+                    backgroundColor: Color(colors.card).alpha(0.98).toString(),
+                    borderColor: Color(colors.primary).alpha(0.18).toString(),
+                },
+            ]}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("common.cancel")}
+                onPress={onCancel}
+                style={({ pressed }) => [
+                    style.selectionToolbarTextAction,
+                    pressed ? style.pressed : null,
+                ]}>
+                <ThemeText fontSize="description" fontColor="textSecondary">
+                    {t("common.cancel")}
+                </ThemeText>
+            </Pressable>
+            <ThemeText fontWeight="semibold" style={style.selectionCount}>
+                {t("pluginSetting.menu.selectedPluginCount", {
+                    count: selectedCount,
+                })}
+            </ThemeText>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                    allSelected ? t("common.unselectAll") : t("common.selectAll")
+                }
+                onPress={onToggleSelectAll}
+                style={({ pressed }) => [
+                    style.selectionToolbarTextAction,
+                    pressed ? style.pressed : null,
+                ]}>
+                <ThemeText fontSize="description" color={colors.primary}>
+                    {allSelected ? t("common.unselectAll") : t("common.selectAll")}
+                </ThemeText>
+            </Pressable>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("pluginSetting.menu.batchUninstall")}
+                accessibilityState={{ disabled: selectedCount === 0 }}
+                disabled={selectedCount === 0}
+                onPress={onUninstall}
+                style={({ pressed }) => [
+                    style.selectionUninstall,
+                    {
+                        backgroundColor: Color(colors.notification).alpha(
+                            selectedCount ? 0.14 : 0.06,
+                        ).toString(),
+                    },
+                    pressed ? style.pressed : null,
+                ]}>
+                <Icon
+                    name="trash-outline"
+                    size={rpx(30)}
+                    color={colors.notification}
+                />
+            </Pressable>
         </View>
     );
 }
@@ -468,6 +623,33 @@ const style = StyleSheet.create({
     wrapper: {
         width: "100%",
         flex: 1,
+    },
+    selectionToolbar: {
+        minHeight: rpx(78),
+        marginHorizontal: rpx(24),
+        marginTop: rpx(16),
+        paddingHorizontal: rpx(10),
+        borderRadius: rpx(24),
+        borderWidth: StyleSheet.hairlineWidth,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    selectionToolbarTextAction: {
+        minHeight: rpx(56),
+        paddingHorizontal: rpx(12),
+        justifyContent: "center",
+    },
+    selectionCount: {
+        flex: 1,
+        textAlign: "center",
+    },
+    selectionUninstall: {
+        width: rpx(56),
+        height: rpx(56),
+        marginLeft: rpx(6),
+        borderRadius: rpx(18),
+        alignItems: "center",
+        justifyContent: "center",
     },
     blank: {
         height: rpx(200),

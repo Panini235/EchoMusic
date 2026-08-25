@@ -9,7 +9,7 @@ import Base64 from "@/utils/base64";
 import delay from "@/utils/delay";
 import { addFileScheme, getFileName } from "@/utils/fileUtils";
 import { getMediaExtraProperty, patchMediaExtra } from "@/utils/mediaExtra";
-import { getLocalPath, isSameMediaItem, resetMediaItem } from "@/utils/mediaUtils";
+import { getLocalPath, getLocalPathWithFallback, isSameMediaItem, resetMediaItem } from "@/utils/mediaUtils";
 import notImplementedFunction from "@/utils/notImplementedFunction.ts";
 import axios from "axios";
 import bigInt from "big-integer";
@@ -201,8 +201,15 @@ class PluginMethodsWrapper implements IPlugin.IPluginInstanceMethods {
         if (!skipLegacyLocalResolution) {
             // Legacy callers retain the original existence-only local shortcut.
             const localPathInMediaExtra = getMediaExtraProperty(musicItem, "localPath");
-            const localPath = getLocalPath(musicItem);
-            if (localPath && (await exists(localPath))) {
+            const localPath = await getLocalPathWithFallback(musicItem);
+            const localFilePath = localPath?.startsWith("file://")
+                ? localPath.slice(7)
+                : localPath;
+            if (
+                localPath &&
+                (localPath.startsWith("content://") ||
+                    (localFilePath && (await exists(localFilePath))))
+            ) {
                 trace("本地播放");
                 if (localPathInMediaExtra !== localPath) {
                     patchMediaExtra(musicItem, { localPath });

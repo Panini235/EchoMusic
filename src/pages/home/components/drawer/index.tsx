@@ -163,28 +163,28 @@ export default function HomeDrawer(props: any) {
                 <DrawerSection delay={120} title={t("common.other")} items={utilityItems} />
                 <DrawerSection delay={170} title={t("common.software")} items={appItems} />
 
-                <Animated.View
-                    entering={FadeInDown.delay(210).duration(360)}
-                    style={[
-                        styles.exitRow,
-                        { borderColor: Color(colors.text).alpha(0.08).toString() },
-                    ]}>
-                    <ExitButton
-                        icon="home-outline"
-                        title={t("sidebar.backToDesktop")}
-                        onPress={() => BackHandler.exitApp()}
-                    />
-                    <View style={[styles.exitDivider, { backgroundColor: colors.divider }]} />
-                    <ExitButton
-                        icon="power-outline"
-                        title={t("sidebar.exitApp")}
-                        onPress={async () => {
-                            await TrackPlayer.reset();
-                            NativeUtils.exitApp();
-                        }}
-                    />
-                </Animated.View>
             </DrawerContentScrollView>
+            <Animated.View
+                entering={FadeInDown.delay(210).duration(360)}
+                style={[
+                    styles.exitRow,
+                    { borderColor: Color(colors.text).alpha(0.08).toString() },
+                ]}>
+                <ExitButton
+                    icon="home-outline"
+                    title={t("sidebar.backToDesktop")}
+                    onPress={() => BackHandler.exitApp()}
+                />
+                <View style={[styles.exitDivider, { backgroundColor: colors.divider }]} />
+                <ExitButton
+                    icon="power-outline"
+                    title={t("sidebar.exitApp")}
+                    onPress={async () => {
+                        await TrackPlayer.reset();
+                        NativeUtils.exitApp();
+                    }}
+                />
+            </Animated.View>
         </SafeAreaView>
     );
 }
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: rpx(22),
         paddingTop: rpx(12),
-        paddingBottom: rpx(40),
+        paddingBottom: rpx(12),
     },
     brandCard: {
         minHeight: rpx(116),
@@ -312,7 +312,8 @@ const styles = StyleSheet.create({
     },
     exitRow: {
         minHeight: rpx(84),
-        marginTop: rpx(20),
+        marginHorizontal: rpx(22),
+        paddingVertical: rpx(6),
         borderTopWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",

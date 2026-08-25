@@ -8,6 +8,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
+type ActionButtonVariant = "regular" | "compact";
+
 interface IActionButtonProps {
     iconName: IIconName;
     iconColor?: string;
@@ -15,12 +17,22 @@ interface IActionButtonProps {
     action?: () => void;
     style?: StyleProp<ViewStyle>;
     delay?: number;
+    variant?: ActionButtonVariant;
 }
 
 export default function ActionButton(props: IActionButtonProps) {
-    const { iconName, iconColor, title, action, style, delay = 0 } = props;
+    const {
+        iconName,
+        iconColor,
+        title,
+        action,
+        style,
+        delay = 0,
+        variant = "regular",
+    } = props;
     const colors = useColors();
     const accent = iconColor ?? colors.primary;
+    const compact = variant === "compact";
 
     return (
         <Animated.View entering={FadeInDown.delay(delay).duration(320)} style={style}>
@@ -40,21 +52,22 @@ export default function ActionButton(props: IActionButtonProps) {
                     accessible={false}
                     style={[
                         styles.iconWell,
+                        compact ? styles.iconWellCompact : null,
                         { backgroundColor: Color(accent).alpha(0.13).toString() },
                     ]}>
                     <Icon
                         accessible={false}
                         name={iconName}
                         color={accent}
-                        size={rpx(52)}
+                        size={rpx(compact ? 34 : 52)}
                     />
                 </View>
                 <ThemeText
                     accessible={false}
-                    fontSize="subTitle"
+                    fontSize={compact ? "description" : "subTitle"}
                     fontWeight="semibold"
                     numberOfLines={1}
-                    style={styles.text}>
+                    style={[styles.text, compact ? styles.textCompact : null]}>
                     {title}
                 </ThemeText>
             </TouchableOpacity>
@@ -79,7 +92,15 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
+    iconWellCompact: {
+        width: rpx(64),
+        height: rpx(64),
+        borderRadius: rpx(22),
+    },
     text: {
         marginTop: rpx(14),
+    },
+    textCompact: {
+        marginTop: rpx(8),
     },
 });

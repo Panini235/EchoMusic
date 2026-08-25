@@ -40,6 +40,7 @@ export default function HomeBody() {
             ListHeaderComponent={
                 <>
                     <ContinueListening />
+                    <Operations navigate={guardedNavigate} />
                     <RecentlyPlayed />
                     <SheetSectionHeader
                         selectedTab={model.selectedTab}
@@ -49,7 +50,6 @@ export default function HomeBody() {
                     />
                 </>
             }
-            ListFooterComponent={<Operations navigate={guardedNavigate} />}
             renderItem={({ item, index }) => (
                 <HomeSheetCard
                     sheet={item}

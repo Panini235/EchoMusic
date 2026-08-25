@@ -8,7 +8,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { showDialog } from "@/components/dialogs/useDialog";
 import { showPanel } from "@/components/panels/usePanel";
 import rpx from "@/utils/rpx";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import ThemeText from "@/components/base/themeText";
 import IconTextButton from "@/components/base/iconTextButton";
 import ThemeSwitch from "@/components/base/switch";
@@ -20,6 +20,10 @@ import Color from "color";
 
 interface IPluginItemProps {
     plugin: Plugin;
+    selectionMode?: boolean;
+    selected?: boolean;
+    onEnterSelectionMode?: (hash: string) => void;
+    onSelectionChange?: (hash: string) => void;
 }
 
 interface IOption {
@@ -30,7 +34,13 @@ interface IOption {
 }
 
 function _PluginItem(props: IPluginItemProps) {
-    const { plugin } = props;
+    const {
+        plugin,
+        selectionMode = false,
+        selected = false,
+        onEnterSelectionMode,
+        onSelectionChange,
+    } = props;
     const colors = useColors();
     const enabled = usePluginEnabled(plugin);
     const { t } = useI18N();
@@ -201,84 +211,125 @@ function _PluginItem(props: IPluginItemProps) {
     ];
 
     return (
-        <View
+        <Pressable
+            accessibilityRole={selectionMode ? "checkbox" : undefined}
+            accessibilityLabel={selectionMode ? plugin.name : undefined}
+            accessibilityState={selectionMode ? { checked: selected } : undefined}
+            delayLongPress={360}
+            onLongPress={
+                selectionMode
+                    ? undefined
+                    : () => onEnterSelectionMode?.(plugin.hash)
+            }
+            onPress={
+                selectionMode
+                    ? () => onSelectionChange?.(plugin.hash)
+                    : undefined
+            }
             style={[
                 styles.container,
                 {
-                    backgroundColor: colors.card,
-                    borderColor: Color(colors.text).alpha(0.06).toString(),
+                    backgroundColor:
+                        selectionMode && selected
+                            ? Color(colors.primary).alpha(0.10).toString()
+                            : colors.card,
+                    borderColor:
+                        selectionMode && selected
+                            ? colors.primary
+                            : Color(colors.text).alpha(0.06).toString(),
                     shadowColor: colors.shadow,
                 },
             ]}>
-            <View style={styles.header}>
-                <View
-                    style={[
-                        styles.pluginIcon,
-                        { backgroundColor: Color(colors.primary).alpha(0.13).toString() },
-                    ]}>
-                    <Icon name="javascript" size={rpx(36)} color={colors.primary} />
-                </View>
-                <View style={styles.headerPluginContainer}>
-                    <ThemeText
-                        numberOfLines={1}
-                        fontSize="title">
-                        {plugin.name}
-                    </ThemeText>
-                    {
-                        plugin.instance.description?.length ? <IconButton name='question-mark-circle' sizeType='light' onPress={() => {
-                            showDialog("MarkdownDialog", {
-                                title: plugin.name,
-                                markdownContent: plugin.instance.description!,
-                            });
-                        }} /> : null
-                    }
+            <View pointerEvents={selectionMode ? "none" : "auto"}>
+                <View style={styles.header}>
+                    <View
+                        style={[
+                            styles.pluginIcon,
+                            { backgroundColor: Color(colors.primary).alpha(0.13).toString() },
+                        ]}>
+                        <Icon name="javascript" size={rpx(36)} color={colors.primary} />
+                    </View>
+                    <View style={styles.headerPluginContainer}>
+                        <ThemeText
+                            numberOfLines={1}
+                            fontSize="title">
+                            {plugin.name}
+                        </ThemeText>
+                        {
+                            plugin.instance.description?.length ? <IconButton name='question-mark-circle' sizeType='light' onPress={() => {
+                                showDialog("MarkdownDialog", {
+                                    title: plugin.name,
+                                    markdownContent: plugin.instance.description!,
+                                });
+                            }} /> : null
+                        }
 
+                    </View>
+                    <ThemeSwitch
+                        value={enabled}
+                        onValueChange={val => {
+                            pluginManager.setPluginEnabled(plugin, val);
+                        }}
+                    />
                 </View>
-                <ThemeSwitch
-                    value={enabled}
-                    onValueChange={val => {
-                        pluginManager.setPluginEnabled(plugin, val);
-                    }}
-                />
-            </View>
-            <View style={styles.description}>
-                <ThemeText fontSize="subTitle" fontColor="textSecondary">
-                    {t("pluginSetting.pluginItem.versionHint", {
-                        version: plugin.instance.version,
-                    })}
-                </ThemeText>
-                {plugin.instance.author ? (
-                    <ThemeText
-                        fontSize="subTitle"
-                        fontColor="textSecondary"
-                        numberOfLines={1}
-                        style={styles.author}>
-                        {t("pluginSetting.pluginItem.author", {
-                            author: plugin.instance.author,
+                <View style={styles.description}>
+                    <ThemeText fontSize="subTitle" fontColor="textSecondary">
+                        {t("pluginSetting.pluginItem.versionHint", {
+                            version: plugin.instance.version,
                         })}
                     </ThemeText>
-                ) : null}
+                    {plugin.instance.author ? (
+                        <ThemeText
+                            fontSize="subTitle"
+                            fontColor="textSecondary"
+                            numberOfLines={1}
+                            style={styles.author}>
+                            {t("pluginSetting.pluginItem.author", {
+                                author: plugin.instance.author,
+                            })}
+                        </ThemeText>
+                    ) : null}
+                </View>
+                {alternativePluginName ? <View style={styles.alternativePluginDescription}>
+                    <ThemeText fontSize="subTitle" fontColor="textSecondary">
+                        {t("pluginSetting.pluginItem.alternativePlugin", {
+                            name: alternativePluginName,
+                        })}
+                    </ThemeText>
+                </View> : null}
+                <View style={styles.contents}>
+                    {options.map((it, index) =>
+                        it.show !== false ? (
+                            <IconTextButton
+                                key={index}
+                                icon={it.icon}
+                                onPress={it.onPress}>
+                                {it.title}
+                            </IconTextButton>
+                        ) : null,
+                    )}
+                </View>
             </View>
-            {alternativePluginName ? <View style={styles.alternativePluginDescription}>
-                <ThemeText fontSize="subTitle" fontColor="textSecondary">
-                    {t("pluginSetting.pluginItem.alternativePlugin", {
-                        name: alternativePluginName,
-                    })}
-                </ThemeText>
-            </View> : null}
-            <View style={styles.contents}>
-                {options.map((it, index) =>
-                    it.show !== false ? (
-                        <IconTextButton
-                            key={index}
-                            icon={it.icon}
-                            onPress={it.onPress}>
-                            {it.title}
-                        </IconTextButton>
-                    ) : null,
-                )}
-            </View>
-        </View>
+            {selectionMode ? (
+                <View
+                    pointerEvents="none"
+                    style={[
+                        styles.selectionMark,
+                        {
+                            backgroundColor: selected
+                                ? colors.primary
+                                : Color(colors.card).alpha(0.92).toString(),
+                            borderColor: selected
+                                ? colors.primary
+                                : Color(colors.text).alpha(0.12).toString(),
+                        },
+                    ]}>
+                    {selected ? (
+                        <Icon name="check-circle" size={rpx(34)} color="#FFFFFF" />
+                    ) : null}
+                </View>
+            ) : null}
+        </Pressable>
         // <List.Accordion
         //     theme={{
         //         colors: {
@@ -321,9 +372,13 @@ function _PluginItem(props: IPluginItemProps) {
     );
 }
 
-const PluginItem = memo(_PluginItem, (prev, curr) => {
-    return prev.plugin === curr.plugin;
-});
+const PluginItem = memo(
+    _PluginItem,
+    (prev, curr) =>
+        prev.plugin === curr.plugin &&
+        prev.selectionMode === curr.selectionMode &&
+        prev.selected === curr.selected,
+);
 export default PluginItem;
 
 const styles = StyleSheet.create({
@@ -338,6 +393,17 @@ const styles = StyleSheet.create({
         shadowRadius: rpx(14),
         shadowOffset: { width: 0, height: rpx(6) },
         elevation: 3,
+    },
+    selectionMark: {
+        position: "absolute",
+        top: rpx(16),
+        right: rpx(16),
+        width: rpx(44),
+        height: rpx(44),
+        borderRadius: rpx(22),
+        borderWidth: StyleSheet.hairlineWidth,
+        alignItems: "center",
+        justifyContent: "center",
     },
     header: {
         paddingHorizontal: rpx(20),
