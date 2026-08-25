@@ -106,6 +106,7 @@
     "localMusic.downloadList": "Download List",
     "localMusic.sortMusic": "Sort Local Music",
     "localMusic.noMediaFound": "No importable audio files were found in the selected folders",
+    "localMusic.audioReadPermissionDenied": "Allow access to music and audio before scanning",
     "sheetDetail.downloadAllToConfiguredFolder": "Download All to Configured Folder",
     "panel.musicItemOptions.localPath": "Local File Path",
     "panel.musicItemOptions.switchSource": "Switch Source",

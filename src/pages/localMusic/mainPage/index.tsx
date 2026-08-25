@@ -9,6 +9,7 @@ import { showDialog } from "@/components/dialogs/useDialog";
 import AppBar from "@/components/base/appBar";
 import { useI18N } from "@/core/i18n";
 import PersistStatus from "@/utils/persistStatus";
+import NativeUtils from "@/native/utils";
 
 export default function MainPage() {
     const navigate = useNavigate();
@@ -53,6 +54,11 @@ export default function MainPage() {
                         icon: "magnifying-glass",
                         title: t("localMusic.scanLocalMusic"),
                         async onPress() {
+                            const canReadAudio = await NativeUtils.requestAudioReadPermission();
+                            if (!canReadAudio) {
+                                Toast.warn(t("localMusic.audioReadPermissionDenied"));
+                                return;
+                            }
                             navigate(ROUTE_PATH.FILE_SELECTOR, {
                                 fileType: "folder",
                                 multi: true,
@@ -71,7 +77,9 @@ export default function MainPage() {
                                                 Toast.warn(
                                                     reason?.message === "NO_LOCAL_MEDIA_FOUND"
                                                         ? t("localMusic.noMediaFound")
-                                                        : t("toast.unknownError", { reason: reason?.message ?? reason }),
+                                                        : reason?.message === "LOCAL_MEDIA_ACCESS_DENIED"
+                                                            ? t("localMusic.audioReadPermissionDenied")
+                                                            : t("toast.unknownError", { reason: reason?.message ?? reason }),
                                                 );
                                                 hideDialog();
                                                 resolve(false);

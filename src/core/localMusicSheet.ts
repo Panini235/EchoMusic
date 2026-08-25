@@ -125,6 +125,7 @@ async function getMusicStats(folderPaths: string[]) {
     const _importToken = nanoid();
     importToken = _importToken;
     const musicList: string[] = [];
+    let unreadableFolderCount = 0;
     let peek: string | undefined;
     let dirFiles: ReadDirItem[] = [];
     while (folderPaths.length !== 0) {
@@ -135,6 +136,7 @@ async function getMusicStats(folderPaths: string[]) {
         try {
             dirFiles = await readDir(peek);
         } catch {
+            unreadableFolderCount += 1;
             dirFiles = [];
         }
 
@@ -147,6 +149,9 @@ async function getMusicStats(folderPaths: string[]) {
         });
     }
 
+    if (musicList.length === 0 && unreadableFolderCount > 0) {
+        throw new Error("LOCAL_MEDIA_ACCESS_DENIED");
+    }
     return { musicList, token: _importToken };
 }
 

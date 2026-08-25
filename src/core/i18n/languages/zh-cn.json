@@ -106,6 +106,7 @@
     "localMusic.downloadList": "下载列表",
     "localMusic.sortMusic": "本地音乐排序",
     "localMusic.noMediaFound": "所选目录中未发现可导入的音频文件",
+    "localMusic.audioReadPermissionDenied": "请允许访问音乐和音频后再扫描",
     "sheetDetail.downloadAllToConfiguredFolder": "下载全部到设置目录",
     "panel.musicItemOptions.localPath": "本地文件路径",
     "panel.musicItemOptions.switchSource": "更换音源",

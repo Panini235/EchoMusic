@@ -128,6 +128,7 @@ export interface ILanguageData {
     "localMusic.downloadList": string; // 下载列表
     "localMusic.sortMusic": string; // 本地音乐排序
     "localMusic.noMediaFound": string; // 未发现可导入音频
+    "localMusic.audioReadPermissionDenied": string; // 音频读取权限不足
     "sheetDetail.downloadAllToConfiguredFolder": string; // 下载全部到设置目录
     "panel.musicItemOptions.localPath": string; // 本地文件路径
     "panel.musicItemOptions.switchSource": string; // 更换音源
