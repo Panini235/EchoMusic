@@ -126,6 +126,23 @@ export interface ILanguageData {
     "localMusic.scanLocalMusic": string; // 扫描本地音乐
     "localMusic.beginScan": string; // 开始扫描
     "localMusic.downloadList": string; // 下载列表
+    "localMusic.sortMusic": string; // 本地音乐排序
+    "localMusic.noMediaFound": string; // 未发现可导入音频
+    "localMusic.audioReadPermissionDenied": string; // 音频读取权限不足
+    "sheetDetail.downloadAllToConfiguredFolder": string; // 下载全部到设置目录
+    "panel.musicItemOptions.localPath": string; // 本地文件路径
+    "panel.musicItemOptions.switchSource": string; // 更换音源
+    "panel.musicItemOptions.downloadToConfiguredFolder": string; // 下载到设置目录
+    "panel.switchSource.title": string; // 更换音源
+    "panel.switchSource.source": string; // 音源名称
+    "panel.switchSource.searchPlaceholder": string; // 搜索候选
+    "panel.switchSource.searchHint": string; // 试听与换源提示
+    "panel.switchSource.noSource": string; // 无可用音源
+    "panel.switchSource.noResults": string; // 无候选结果
+    "panel.switchSource.searchFailed": string; // 搜索失败
+    "panel.switchSource.playing": string; // 正在播放候选
+    "panel.switchSource.cannotReplace": string; // 无法替换
+    "panel.switchSource.replaced": string; // 换源成功
 
     // 歌词相关
     "lyric.lyricLinkedFrom": string; // 歌词来自
@@ -219,6 +236,9 @@ export interface ILanguageData {
     "pluginSetting.menu.sort": string; // 排序
     "pluginSetting.menu.uninstallAll": string; // 卸载所有
     "pluginSetting.menu.uninstallAllContent": string; // 确定卸载所有插件吗？
+    "pluginSetting.menu.batchUninstall": string; // 批量卸载插件
+    "pluginSetting.menu.batchUninstallContent": string; // 确定卸载所选插件吗？
+    "pluginSetting.menu.selectedPluginCount": string; // 已选择插件数量
     "pluginSetting.menu.installPlugin": string; // 安装插件
     "pluginSetting.menu.installPluginDialogPlaceholder": string; // 插件安装对话框占位符
     "pluginSetting.menu.pluginInstallFailedDialogTitle": string; // 插件安装失败对话框标题

@@ -24,6 +24,10 @@ import RNTrackPlayer, { AppKilledPlaybackBehavior, Capability } from "react-nati
 import i18n from "@/core/i18n";
 import bootstrapAtom from "./bootstrap.atom";
 import { getDefaultStore } from "jotai";
+import {
+    allowAppSurfaceHandoff,
+    requestHomeHandoff,
+} from "./launchHandoff";
 
 
 // 依赖管理
@@ -33,20 +37,6 @@ TrackPlayer.injectDependencies(Config, musicHistory, PluginManager);
 downloader.injectDependencies(Config, PluginManager);
 lyricManager.injectDependencies(TrackPlayer, Config, PluginManager);
 MusicSheet.injectDependencies(Config);
-
-let nativeSplashHidden = false;
-
-async function hideNativeSplash() {
-    if (nativeSplashHidden) {
-        return;
-    }
-    try {
-        await SplashScreen.hideAsync();
-        nativeSplashHidden = true;
-    } catch (error) {
-        console.warn(error);
-    }
-}
 
 async function bootstrapImpl() {
     await SplashScreen.preventAutoHideAsync()
@@ -81,12 +71,13 @@ async function bootstrapImpl() {
     trace("配置初始化完成");
     logger.mark("配置初始化完成");
 
-    // 先准备主题和文案，然后尽快交给可动的应用内启动页。
-    // 插件和播放器初始化较慢时，不再让用户误以为静态图标卡死。
+    // 先准备主题和文案，然后直接结束系统启动页；不再展示应用内过渡页。
     Theme.setup();
     i18n.setup();
     logger.mark("主题与语言初始化完成");
-    await hideNativeSplash();
+    // The handoff owner waits for this prepared surface and the contained logo's
+    // ready signal before it hides the native splash exactly once.
+    allowAppSurfaceHandoff();
 
     // 加载插件
     await PluginManager.setup();
@@ -312,5 +303,5 @@ export default async function () {
             });
         }
     }
-    await hideNativeSplash();
+    requestHomeHandoff();
 }

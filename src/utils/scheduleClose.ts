@@ -5,76 +5,113 @@ import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import BackgroundTimer from "react-native-background-timer";
 
-
 const deadlineAtom = atom<number | null>(null);
 const closeAfterPlayEndAtom = atom(false);
 
-let timerId: any;
+let scheduleToken = 0;
+let timerId: any = null;
+let afterCurrentListener: (() => void) | null = null;
 
+function clearScheduledWork() {
+    if (timerId) {
+        BackgroundTimer.clearTimeout(timerId);
+        timerId = null;
+    }
+    if (afterCurrentListener) {
+        TrackPlayer.off(TrackPlayerEvents.PlayEnd, afterCurrentListener);
+        afterCurrentListener = null;
+    }
+}
 
 async function exitApp() {
     await TrackPlayer.reset();
     NativeUtils.exitApp();
 }
 
-function setScheduleClose(deadline: number | null) {
-    getDefaultStore().set(deadlineAtom, deadline);
-    timerId && BackgroundTimer.clearTimeout(timerId);
-    if (deadline && deadline > Date.now()) {
-        timerId = BackgroundTimer.setTimeout(async () => {
-            const playAfterEnd = getDefaultStore().get(closeAfterPlayEndAtom);
-            if (playAfterEnd) {
-                TrackPlayer.on(TrackPlayerEvents.PlayEnd, exitApp);
-            } else {
-                exitApp();
-            }
+function consumeSchedule(token: number, deadline: number): boolean {
+    if (
+        token !== scheduleToken ||
+        getDefaultStore().get(deadlineAtom) !== deadline ||
+        Date.now() < deadline
+    ) {
+        return false;
+    }
+    ++scheduleToken;
+    clearScheduledWork();
+    getDefaultStore().set(deadlineAtom, null);
+    return true;
+}
 
-        }, deadline - Date.now());
-    } else {
-        if (timerId) {
-            BackgroundTimer.clearTimeout(timerId);
+function armSchedule(token: number, deadline: number) {
+    timerId = BackgroundTimer.setTimeout(() => {
+        if (
+            token !== scheduleToken ||
+            getDefaultStore().get(deadlineAtom) !== deadline
+        ) {
+            return;
         }
-        timerId = null;
+        const remaining = deadline - Date.now();
+        if (remaining > 0) {
+            armSchedule(token, deadline);
+            return;
+        }
+        if (getDefaultStore().get(closeAfterPlayEndAtom)) {
+            if (afterCurrentListener) {
+                return;
+            }
+            afterCurrentListener = () => {
+                if (consumeSchedule(token, deadline)) {
+                    void exitApp();
+                }
+            };
+            TrackPlayer.on(TrackPlayerEvents.PlayEnd, afterCurrentListener);
+            return;
+        }
+        if (consumeSchedule(token, deadline)) {
+            void exitApp();
+        }
+    }, Math.max(0, deadline - Date.now()));
+}
+
+function setScheduleClose(deadline: number | null) {
+    const token = ++scheduleToken;
+    clearScheduledWork();
+    getDefaultStore().set(deadlineAtom, deadline);
+    if (deadline !== null) {
+        armSchedule(token, deadline);
     }
 }
 
 function setCloseAfterPlayEnd(closeAfterPlayEnd: boolean) {
-    if (!closeAfterPlayEnd) {
-        // 边界条件：如果倒计时结束后，Trackplayer停止播放前，取消了修改
-        TrackPlayer.off(TrackPlayerEvents.PlayEnd, exitApp);
-    }
     getDefaultStore().set(closeAfterPlayEndAtom, closeAfterPlayEnd);
+    const deadline = getDefaultStore().get(deadlineAtom);
+    setScheduleClose(deadline);
 }
 
 function useScheduleCloseCountDown() {
     const deadline = useAtomValue(deadlineAtom);
-
     const [countDown, setCountDown] = useState(
-        deadline ? deadline - Date.now() : null);
-
+        deadline ? deadline - Date.now() : null,
+    );
     const intervalRef = useRef<any>();
 
     useEffect(() => {
-        // deadline改变时，更新定时器
-        // 清除原有的定时器
-        intervalRef.current && clearInterval(intervalRef.current);
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
         intervalRef.current = null;
-
-        // 清空定时
         if (!deadline || deadline <= Date.now()) {
             setCountDown(null);
             return;
-        } else {
-            // 更新倒计时
-            setCountDown(Math.max(deadline - Date.now(), 0) / 1000);
-            intervalRef.current = setInterval(() => {
-                setCountDown(Math.max(deadline - Date.now(), 0) / 1000);
-            }, 1000);
         }
-
+        setCountDown(Math.max(deadline - Date.now(), 0) / 1000);
+        intervalRef.current = setInterval(() => {
+            setCountDown(Math.max(deadline - Date.now(), 0) / 1000);
+        }, 1000);
         return () => {
-            // 清除定时器
-            intervalRef.current && clearInterval(intervalRef.current);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
             intervalRef.current = null;
         };
     }, [deadline]);
@@ -82,8 +119,11 @@ function useScheduleCloseCountDown() {
     return countDown;
 }
 
-
 const useCloseAfterPlayEnd = () => useAtomValue(closeAfterPlayEndAtom);
 
-
-export { setScheduleClose, useScheduleCloseCountDown, setCloseAfterPlayEnd, useCloseAfterPlayEnd };
+export {
+    setScheduleClose,
+    useScheduleCloseCountDown,
+    setCloseAfterPlayEnd,
+    useCloseAfterPlayEnd,
+};

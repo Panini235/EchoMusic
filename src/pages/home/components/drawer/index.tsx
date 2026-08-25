@@ -137,15 +137,6 @@ export default function HomeDrawer(props: any) {
                             borderColor: Color(colors.primary).alpha(0.18).toString(),
                         },
                     ]}>
-                    <Image source={ImgAsset.logo} style={styles.logo} />
-                    <View style={styles.brandCopy}>
-                        <ThemeText fontSize="title" fontWeight="bold">
-                            {DeviceInfo.getApplicationName()}
-                        </ThemeText>
-                        <ThemeText fontColor="textSecondary" fontSize="description">
-                            {t("home.brandTagline")}
-                        </ThemeText>
-                    </View>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t("sidebar.basicSettings")}
@@ -157,34 +148,46 @@ export default function HomeDrawer(props: any) {
                         ]}>
                         <Icon name="cog-8-tooth" size={rpx(32)} color={colors.primary} />
                     </Pressable>
+                    <Image source={ImgAsset.logo} style={styles.logo} />
+                    <View style={styles.brandCopy}>
+                        <ThemeText fontSize="title" fontWeight="bold">
+                            {DeviceInfo.getApplicationName()}
+                        </ThemeText>
+                        <ThemeText fontColor="textSecondary" fontSize="description">
+                            {t("home.brandTagline")}
+                        </ThemeText>
+                    </View>
                 </Animated.View>
 
                 <DrawerSection delay={70} title={t("sidebar.controlCenter")} items={libraryItems} />
                 <DrawerSection delay={120} title={t("common.other")} items={utilityItems} />
                 <DrawerSection delay={170} title={t("common.software")} items={appItems} />
 
-                <Animated.View
-                    entering={FadeInDown.delay(210).duration(360)}
-                    style={[
-                        styles.exitRow,
-                        { borderColor: Color(colors.text).alpha(0.08).toString() },
-                    ]}>
-                    <ExitButton
-                        icon="home-outline"
-                        title={t("sidebar.backToDesktop")}
-                        onPress={() => BackHandler.exitApp()}
-                    />
-                    <View style={[styles.exitDivider, { backgroundColor: colors.divider }]} />
-                    <ExitButton
-                        icon="power-outline"
-                        title={t("sidebar.exitApp")}
-                        onPress={async () => {
-                            await TrackPlayer.reset();
-                            NativeUtils.exitApp();
-                        }}
-                    />
-                </Animated.View>
             </DrawerContentScrollView>
+            <Animated.View
+                entering={FadeInDown.delay(210).duration(360)}
+                style={[
+                    styles.exitRow,
+                    {
+                        backgroundColor: Color(colors.card).alpha(0.94).toString(),
+                        borderColor: Color(colors.text).alpha(0.08).toString(),
+                    },
+                ]}>
+                <ExitButton
+                    icon="home-outline"
+                    title={t("sidebar.backToDesktop")}
+                    onPress={() => BackHandler.exitApp()}
+                />
+                <View style={[styles.exitDivider, { backgroundColor: colors.divider }]} />
+                <ExitButton
+                    icon="power-outline"
+                    title={t("sidebar.exitApp")}
+                    onPress={async () => {
+                        await TrackPlayer.reset();
+                        NativeUtils.exitApp();
+                    }}
+                />
+            </Animated.View>
         </SafeAreaView>
     );
 }
@@ -264,7 +267,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: rpx(22),
         paddingTop: rpx(12),
-        paddingBottom: rpx(40),
+        paddingBottom: rpx(12),
     },
     brandCard: {
         minHeight: rpx(116),
@@ -288,6 +291,7 @@ const styles = StyleSheet.create({
         width: rpx(56),
         height: rpx(56),
         borderRadius: rpx(20),
+        marginRight: rpx(14),
         alignItems: "center",
         justifyContent: "center",
     },
@@ -312,7 +316,8 @@ const styles = StyleSheet.create({
     },
     exitRow: {
         minHeight: rpx(84),
-        marginTop: rpx(20),
+        paddingHorizontal: rpx(22),
+        paddingVertical: rpx(6),
         borderTopWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",

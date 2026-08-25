@@ -6,6 +6,7 @@ import { useI18N } from "@/core/i18n";
 import MusicSheet, { useSheetItem } from "@/core/musicSheet";
 import { ROUTE_PATH, useParams } from "@/core/router";
 import { default as Toast, default as toast } from "@/utils/toast";
+import downloader from "@/core/downloader";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 
@@ -36,6 +37,15 @@ export default function () {
                                 musicList: musicSheet.musicList,
                                 musicSheet: musicSheet,
                             });
+                        },
+                    },
+                    {
+                        icon: "arrow-down-tray",
+                        title: t("sheetDetail.downloadAllToConfiguredFolder"),
+                        show: musicSheet.musicList.length > 0,
+                        onPress() {
+                            downloader.download(musicSheet.musicList);
+                            Toast.success(t("toast.beginDownload"));
                         },
                     },
                     {
