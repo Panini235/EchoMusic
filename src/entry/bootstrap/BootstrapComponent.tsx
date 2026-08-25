@@ -1,49 +1,24 @@
 import { useAppConfig } from "@/core/appConfig";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Theme from "@/core/theme";
 import useCheckUpdate from "@/hooks/useCheckUpdate";
 import { useListenOrientationChange } from "@/hooks/useOrientation";
 import { getDefaultStore, useAtomValue } from "jotai";
-import { AppState, Image, NativeEventSubscription, StyleSheet, useColorScheme, View } from "react-native";
+import { AppState, NativeEventSubscription, useColorScheme } from "react-native";
 import bootstrapAtom from "./bootstrap.atom";
 import { initTrackPlayer } from "./bootstrap";
 import { showDialog } from "@/components/dialogs/useDialog";
 import i18n from "@/core/i18n";
-import { ImgAsset } from "@/constants/assetsConst";
-import ThemeText from "@/components/base/themeText";
-import Animated, {
-    cancelAnimation,
-    Easing,
-    FadeOut,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withTiming,
-} from "react-native-reanimated";
-import rpx from "@/utils/rpx";
-import {
-    launchHandoffAtom,
-    notifyAppSurfaceReady,
-    requestHomeHandoff,
-    startLaunchHandoff,
-} from "./launchHandoff";
 
+/** 保留应用初始化和播放器恢复逻辑；启动视觉仅使用系统原生启动页。 */
 export function BootstrapComponent() {
     const bootstrapState = useAtomValue(bootstrapAtom);
-    const launchPhase = useAtomValue(launchHandoffAtom);
-    const pulse = useSharedValue(0);
 
     useListenOrientationChange();
     useCheckUpdate();
 
     const followSystem = useAppConfig("theme.followSystem");
-
     const colorScheme = useColorScheme();
-
-    useEffect(() => {
-        startLaunchHandoff();
-    }, []);
 
     useEffect(() => {
         if (followSystem) {
@@ -87,125 +62,9 @@ export function BootstrapComponent() {
         }
 
         return () => {
-            if (appStateEventSubscription) {
-                appStateEventSubscription.remove();
-            }
+            appStateEventSubscription?.remove();
         };
     }, [bootstrapState]);
 
-    useEffect(() => {
-        if (bootstrapState.state === "Loading" && launchPhase !== "HOME") {
-            pulse.value = withRepeat(
-                withSequence(
-                    withTiming(1, {
-                        duration: 760,
-                        easing: Easing.inOut(Easing.quad),
-                    }),
-                    withTiming(0, {
-                        duration: 760,
-                        easing: Easing.inOut(Easing.quad),
-                    }),
-                ),
-                -1,
-                false,
-            );
-        } else {
-            cancelAnimation(pulse);
-        }
-        return () => cancelAnimation(pulse);
-    }, [bootstrapState.state, launchPhase, pulse]);
-
-    useEffect(() => {
-        if (bootstrapState.state !== "Loading") {
-            requestHomeHandoff();
-        }
-    }, [bootstrapState.state]);
-
-    const logoStyle = useAnimatedStyle(() => ({
-        opacity: 0.78 + pulse.value * 0.22,
-        transform: [{ scale: 0.94 + pulse.value * 0.06 }],
-    }));
-
-    if (launchPhase === "HOME") {
-        return null;
-    }
-
-    return (
-        <Animated.View
-            exiting={FadeOut.duration(260)}
-            // 始终穿透触摸，避免任何异常初始化把全应用变成一张不可点击的启动图。
-            pointerEvents="none"
-            accessible={false}
-            style={styles.launchOverlay}>
-            <View style={styles.launchContent}>
-                <Animated.View style={[styles.logoStage, logoStyle]}>
-                    <View style={styles.logoDecoration} />
-                    <View style={styles.logoSafeArea}>
-                        <Image
-                            source={ImgAsset.logoTransparent}
-                            resizeMode="contain"
-                            onLoad={notifyAppSurfaceReady}
-                            style={styles.logo}
-                        />
-                    </View>
-                </Animated.View>
-                <ThemeText
-                    color="rgba(255,255,255,0.72)"
-                    fontSize="subTitle"
-                    fontWeight="medium"
-                    style={styles.launchText}>
-                    {i18n.t("startup.preparing")}
-                </ThemeText>
-            </View>
-        </Animated.View>
-    );
+    return null;
 }
-
-const styles = StyleSheet.create({
-    launchOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 20000,
-        elevation: 20000,
-        backgroundColor: "#070A0F",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    launchContent: {
-        alignItems: "center",
-        justifyContent: "center",
-        transform: [{ translateY: rpx(-18) }],
-    },
-    // The 12rpx transparent inset keeps the complete 174rpx brand layer inside
-    // the animated 198rpx square even at the existing maximum scale of 1.
-    logoStage: {
-        width: rpx(198),
-        height: rpx(198),
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    logoDecoration: {
-        position: "absolute",
-        width: rpx(174),
-        height: rpx(174),
-        borderRadius: rpx(50),
-        backgroundColor: "#1B1F20",
-        shadowColor: "#F1745E",
-        shadowOpacity: 0.30,
-        shadowRadius: rpx(34),
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 14,
-    },
-    logoSafeArea: {
-        width: "100%",
-        height: "100%",
-        padding: rpx(12),
-    },
-    logo: {
-        width: "100%",
-        height: "100%",
-    },
-    launchText: {
-        marginTop: rpx(34),
-        letterSpacing: 0.4,
-    },
-});

@@ -24,7 +24,9 @@ interface IMusicItemProps {
 }
 
 function formatDuration(rawDuration: number) {
-    const duration = Math.floor(Number(rawDuration));
+    const value = Number(rawDuration);
+    // 插件协议约定秒，但部分远端插件实际返回毫秒；本地导入已经是秒。
+    const duration = Math.floor(value >= 10_000 ? value / 1000 : value);
     if (!Number.isFinite(duration) || duration <= 0) {
         return null;
     }

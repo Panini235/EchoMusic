@@ -109,9 +109,9 @@ export function notifyAppSurfaceReady() {
     enterAppSurface();
 }
 
-/** Allows native hide only after bootstrap has prepared the existing theme and text. */
+/** 主题和文案准备完成后直接隐藏系统启动页；不再创建应用内过渡页。 */
 export function allowAppSurfaceHandoff() {
-    startLaunchHandoff();
+    appSurfaceReady = true;
     appSurfaceHandoffAllowed = true;
     enterAppSurface();
 }
