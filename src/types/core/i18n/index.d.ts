@@ -29,6 +29,7 @@ export interface ILanguageData {
     "common.local": string; // 本地
     "common.sure": string; // 确定
     "common.confirm": string; // 确认
+    "common.copy": string; // 复制
     "common.view": string; // 查看
     "common.open": string; // 打开
     "common.viewAll": string; // 查看全部
@@ -96,6 +97,7 @@ export interface ILanguageData {
     "home.viewAllHistory": string;
     "home.frequentPlaylists": string;
     "home.quickAccess": string;
+    "home.home": string;
     "home.library": string;
     "home.discover": string;
     "home.player": string;

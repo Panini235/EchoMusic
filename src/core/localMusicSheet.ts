@@ -3,12 +3,9 @@ import {
     internalSerializeKey,
     supportLocalMediaType,
 } from "@/constants/commonConst";
-import mp3Util, { IBasicMeta } from "@/native/mp3Util";
+import mp3Util, { IBasicMeta, ILocalMediaFile } from "@/native/mp3Util";
 import { getFileName } from "@/utils/fileUtils.ts";
-import {
-    getLocalPath,
-    isSameMediaItem,
-} from "@/utils/mediaUtils";
+import { getLocalPath, isSameMediaItem } from "@/utils/mediaUtils";
 import StateMapper from "@/utils/stateMapper";
 import { getStorage, setStorage } from "@/utils/storage";
 import CryptoJs from "crypto-js";
@@ -19,16 +16,42 @@ import { ReadDirItem, exists, readDir, unlink } from "react-native-fs";
 let localSheet: IMusic.IMusicItem[] = [];
 const localSheetStateMapper = new StateMapper(() => localSheet);
 
+function fileSystemPath(path: string) {
+    if (!path.toLowerCase().startsWith("file://")) {
+        return path;
+    }
+    try {
+        return decodeURIComponent(path.slice(7));
+    } catch {
+        return path.slice(7);
+    }
+}
+
+async function isPersistedLocalPathValid(localPath: string) {
+    if (localPath.toLowerCase().startsWith("content://")) {
+        // MediaStore URIs remain addressable after restart while the runtime audio
+        // permission is granted. RNFS.exists cannot validate content:// URIs.
+        return true;
+    }
+    try {
+        return await exists(fileSystemPath(localPath));
+    } catch {
+        return false;
+    }
+}
+
 export async function setup() {
     const sheet = await getStorage(StorageKeys.LocalMusicSheet);
     if (sheet) {
-        let validSheet: IMusic.IMusicItem[] = [];
-        for (let musicItem of sheet) {
-            const localPath = getLocalPath(musicItem);
-            if (localPath && (await exists(localPath))) {
-                validSheet.push(musicItem);
-            }
-        }
+        const validity = await Promise.all(
+            sheet.map(async musicItem => {
+                const localPath = getLocalPath(musicItem);
+                return (
+                    !!localPath && (await isPersistedLocalPathValid(localPath))
+                );
+            }),
+        );
+        const validSheet = sheet.filter((_, index) => validity[index]);
         if (validSheet.length !== sheet.length) {
             await setStorage(StorageKeys.LocalMusicSheet, validSheet);
         }
@@ -116,43 +139,157 @@ function parseFilename(fn: string): Partial<IMusic.IMusicItem> | null {
 }
 
 function localMediaFilter(filename: string) {
-    return supportLocalMediaType.some(ext => filename.toLowerCase().endsWith(ext));
+    const normalized = filename.toLowerCase();
+    return supportLocalMediaType.some(ext => normalized.endsWith(ext));
+}
+
+function normalizeStoragePath(path: string) {
+    let normalized = fileSystemPath(path)
+        .trim()
+        .replace(/\\/g, "/")
+        .replace(/\/{2,}/g, "/")
+        .replace(/\/$/, "")
+        .toLowerCase();
+    const aliases = [
+        "/sdcard",
+        "/mnt/sdcard",
+        "/storage/self/primary",
+        "/storage/emulated/legacy",
+    ];
+    const alias = aliases.find(
+        candidate =>
+            normalized === candidate || normalized.startsWith(`${candidate}/`),
+    );
+    if (alias) {
+        normalized = `/storage/emulated/0${normalized.slice(alias.length)}`;
+    }
+    return normalized || "/";
+}
+
+interface DiscoveredMedia {
+    uri: string;
+    displayName?: string;
+    sourcePath?: string;
+}
+
+function addDiscoveredMedia(
+    media: DiscoveredMedia,
+    bySourcePath: Map<string, DiscoveredMedia>,
+    byUri: Map<string, DiscoveredMedia>,
+) {
+    const sourceKey = media.sourcePath
+        ? normalizeStoragePath(media.sourcePath)
+        : undefined;
+    const uriKey = media.uri.toLowerCase();
+    if (
+        byUri.has(uriKey) ||
+        (sourceKey !== undefined && bySourcePath.has(sourceKey))
+    ) {
+        return;
+    }
+    byUri.set(uriKey, media);
+    if (sourceKey !== undefined) {
+        bySourcePath.set(sourceKey, media);
+    }
+}
+
+function nativeErrorCode(error: unknown) {
+    if (!error || typeof error !== "object") {
+        return "";
+    }
+    const candidate = error as { code?: unknown; message?: unknown };
+    return `${candidate.code ?? candidate.message ?? ""}`;
 }
 
 let importToken: string | null = null;
 // 获取本地的文件列表
-async function getMusicStats(folderPaths: string[]) {
+async function getMusicStats(inputFolderPaths: string[]) {
     const _importToken = nanoid();
     importToken = _importToken;
-    const musicList: string[] = [];
-    let unreadableFolderCount = 0;
-    let peek: string | undefined;
-    let dirFiles: ReadDirItem[] = [];
-    while (folderPaths.length !== 0) {
+    const selectedFolders = [
+        ...new Map(
+            inputFolderPaths
+                .filter(Boolean)
+                .map(path => [normalizeStoragePath(path), path] as const),
+        ).values(),
+    ];
+    const folderQueue = [...selectedFolders];
+    const visitedFolders = new Set<string>();
+    const unreadableFolders = new Map<string, string>();
+    const bySourcePath = new Map<string, DiscoveredMedia>();
+    const byUri = new Map<string, DiscoveredMedia>();
+
+    while (folderQueue.length !== 0) {
         if (importToken !== _importToken) {
             throw new Error("Import Broken");
         }
-        peek = folderPaths.shift() as string;
+        const folderPath = folderQueue.shift() as string;
+        const folderKey = normalizeStoragePath(folderPath);
+        if (visitedFolders.has(folderKey)) {
+            continue;
+        }
+        visitedFolders.add(folderKey);
+
+        let dirFiles: ReadDirItem[];
         try {
-            dirFiles = await readDir(peek);
+            dirFiles = await readDir(folderPath);
         } catch {
-            unreadableFolderCount += 1;
-            dirFiles = [];
+            unreadableFolders.set(folderKey, folderPath);
+            continue;
         }
 
         dirFiles.forEach(item => {
-            if (item.isDirectory() && !folderPaths.includes(item.path)) {
-                folderPaths.push(item.path);
-            } else if (localMediaFilter(item.path)) {
-                musicList.push(item.path);
+            if (item.isDirectory()) {
+                const itemKey = normalizeStoragePath(item.path);
+                if (!visitedFolders.has(itemKey)) {
+                    folderQueue.push(item.path);
+                }
+            } else if (item.isFile() && localMediaFilter(item.path)) {
+                addDiscoveredMedia(
+                    {
+                        uri: item.path,
+                        displayName: item.name,
+                        sourcePath: item.path,
+                    },
+                    bySourcePath,
+                    byUri,
+                );
             }
         });
     }
 
-    if (musicList.length === 0 && unreadableFolderCount > 0) {
-        throw new Error("LOCAL_MEDIA_ACCESS_DENIED");
+    const fallbackFolders =
+        unreadableFolders.size > 0
+            ? [...unreadableFolders.values()]
+            : byUri.size === 0
+                ? selectedFolders
+                : [];
+    if (fallbackFolders.length > 0) {
+        let mediaStoreFiles: ILocalMediaFile[];
+        try {
+            mediaStoreFiles = await mp3Util.findAudioInFolders(
+                fallbackFolders,
+                supportLocalMediaType,
+            );
+        } catch (error) {
+            const code = nativeErrorCode(error);
+            throw new Error(
+                code.includes("MEDIA_STORE_PERMISSION_DENIED")
+                    ? "LOCAL_MEDIA_ACCESS_DENIED"
+                    : "LOCAL_MEDIA_SCAN_FAILED",
+            );
+        }
+        mediaStoreFiles.forEach(media => {
+            if (
+                media?.uri?.toLowerCase().startsWith("content://") &&
+                localMediaFilter(media.displayName ?? media.sourcePath ?? "")
+            ) {
+                addDiscoveredMedia(media, bySourcePath, byUri);
+            }
+        });
     }
-    return { musicList, token: _importToken };
+
+    return { musicList: [...byUri.values()], token: _importToken };
 }
 
 function cancelImportLocal() {
@@ -161,8 +298,7 @@ function cancelImportLocal() {
 
 // 导入本地音乐
 const groupNum = 25;
-async function importLocal(_folderPaths: string[]) {
-    const folderPaths = [..._folderPaths];
+async function importLocal(folderPaths: string[]) {
     const { musicList, token } = await getMusicStats(folderPaths);
     if (token !== importToken) {
         throw new Error("Import Broken");
@@ -176,7 +312,9 @@ async function importLocal(_folderPaths: string[]) {
     for (let i = 0; i < groups; ++i) {
         metas = metas.concat(
             await mp3Util.getMediaMeta(
-                musicList.slice(i * groupNum, (i + 1) * groupNum),
+                musicList
+                    .slice(i * groupNum, (i + 1) * groupNum)
+                    .map(media => media.uri),
             ),
         );
     }
@@ -184,9 +322,10 @@ async function importLocal(_folderPaths: string[]) {
         throw new Error("Import Broken");
     }
     const musicItems: IMusic.IMusicItem[] = await Promise.all(
-        musicList.map(async (musicPath, index) => {
-            let { platform, id, title, artist } =
-                parseFilename(getFileName(musicPath, true)) ?? {};
+        musicList.map(async (media, index) => {
+            const musicPath = media.uri;
+            const fileName = media.displayName ?? getFileName(musicPath, true);
+            let { platform, id, title, artist } = parseFilename(fileName) ?? {};
             const meta = metas[index];
             if (!platform || !id) {
                 platform = "本地";
@@ -195,7 +334,7 @@ async function importLocal(_folderPaths: string[]) {
             return {
                 id,
                 platform,
-                title: title ?? meta?.title ?? getFileName(musicPath),
+                title: title ?? meta?.title ?? getFileName(fileName),
                 artist: artist ?? meta?.artist ?? "未知歌手",
                 duration: parseInt(meta?.duration ?? "0", 10) / 1000,
                 album: meta?.album ?? "未知专辑",

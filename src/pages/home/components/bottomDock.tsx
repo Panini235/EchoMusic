@@ -1,21 +1,19 @@
 import Icon, { IIconName } from "@/components/base/icon";
 import ThemeText from "@/components/base/themeText";
-import { ImgAsset } from "@/constants/assetsConst";
 import { useI18N } from "@/core/i18n";
 import { ROUTE_PATH, useNavigate } from "@/core/router";
-import { useCurrentMusic } from "@/core/trackPlayer";
 import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
 import { useNavigation } from "@react-navigation/native";
 import Color from "color";
 import React from "react";
-import { Image, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { showPanel } from "@/components/panels/usePanel";
 
 interface IDockItem {
     icon: IIconName;
     label: string;
+    accessibilityLabel?: string;
     active?: boolean;
     onPress: () => void;
 }
@@ -25,35 +23,24 @@ export default function BottomDock() {
     const { t } = useI18N();
     const navigate = useNavigate();
     const navigation = useNavigation<any>();
-    const currentMusic = useCurrentMusic();
 
     const items: IDockItem[] = [
         {
             icon: "home-outline",
-            label: t("home.library"),
+            label: t("home.home"),
             active: true,
             onPress: () => navigation.navigate("HOME-MAIN"),
+        },
+        {
+            icon: "bars-3",
+            label: t("sidebar.controlCenter"),
+            accessibilityLabel: t("home.openControlCenter.a11y"),
+            onPress: () => navigation.openDrawer(),
         },
         {
             icon: "fire-outline",
             label: t("home.discover"),
             onPress: () => navigate(ROUTE_PATH.RECOMMEND_SHEETS),
-        },
-        {
-            icon: "musical-note",
-            label: t("home.player"),
-            onPress: () => {
-                if (currentMusic) {
-                    navigate(ROUTE_PATH.MUSIC_DETAIL);
-                } else {
-                    showPanel("PlayList");
-                }
-            },
-        },
-        {
-            icon: "user",
-            label: t("home.profile"),
-            onPress: () => navigate(ROUTE_PATH.SETTING, { type: "basic" }),
         },
     ];
 
@@ -63,29 +50,14 @@ export default function BottomDock() {
             style={[
                 styles.wrapper,
                 {
-                    backgroundColor: Color(colors.card).alpha(0.96).toString(),
+                    backgroundColor: colors.card,
                     borderColor: Color(colors.text).alpha(0.08).toString(),
                     shadowColor: colors.shadow,
                 },
             ]}>
-            <DockButton item={items[0]} />
-            <DockButton item={items[1]} />
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("home.openControlCenter.a11y")}
-                onPress={() => navigation.openDrawer()}
-                style={({ pressed }) => [
-                    styles.controlButton,
-                    {
-                        borderColor: Color(colors.primary).alpha(0.44).toString(),
-                        backgroundColor: Color(colors.primary).alpha(0.10).toString(),
-                    },
-                    pressed ? styles.controlPressed : null,
-                ]}>
-                <Image source={ImgAsset.logo} style={styles.controlLogo} />
-            </Pressable>
-            <DockButton item={items[2]} />
-            <DockButton item={items[3]} />
+            {items.map(item => (
+                <DockButton key={item.label} item={item} />
+            ))}
         </Animated.View>
     );
 }
@@ -96,11 +68,14 @@ function DockButton({ item }: { item: IDockItem }) {
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={item.label}
+            accessibilityLabel={item.accessibilityLabel ?? item.label}
             accessibilityState={{ selected: item.active }}
             onPress={item.onPress}
             style={({ pressed }) => [
                 styles.item,
+                item.active
+                    ? { backgroundColor: Color(colors.primary).alpha(0.10).toString() }
+                    : null,
                 pressed ? styles.itemPressed : null,
             ]}>
             <Icon
@@ -130,14 +105,14 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-around",
         shadowOpacity: 0.18,
         shadowRadius: rpx(22),
         shadowOffset: { width: 0, height: rpx(10) },
         elevation: 12,
     },
     item: {
-        width: rpx(112),
+        flex: 1,
+        minWidth: 0,
         height: rpx(88),
         borderRadius: rpx(26),
         alignItems: "center",
@@ -149,27 +124,5 @@ const styles = StyleSheet.create({
     },
     label: {
         marginTop: rpx(7),
-    },
-    controlButton: {
-        width: rpx(88),
-        height: rpx(88),
-        borderRadius: rpx(44),
-        borderWidth: StyleSheet.hairlineWidth,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#F1745E",
-        shadowOpacity: 0.20,
-        shadowRadius: rpx(16),
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 8,
-    },
-    controlLogo: {
-        width: rpx(72),
-        height: rpx(72),
-        borderRadius: rpx(24),
-    },
-    controlPressed: {
-        opacity: 0.66,
-        transform: [{ scale: 0.93 }],
     },
 });

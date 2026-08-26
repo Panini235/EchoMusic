@@ -1,6 +1,5 @@
 import Icon from "@/components/base/icon";
 import ThemeText from "@/components/base/themeText";
-import { ImgAsset } from "@/constants/assetsConst";
 import { useI18N } from "@/core/i18n";
 import { ROUTE_PATH } from "@/core/router";
 import useColors from "@/hooks/useColors";
@@ -8,7 +7,7 @@ import rpx from "@/utils/rpx";
 import { useNavigation } from "@react-navigation/native";
 import Color from "color";
 import React from "react";
-import { Image, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function NavBar() {
@@ -20,6 +19,21 @@ export default function NavBar() {
         <Animated.View
             entering={FadeInDown.duration(360)}
             style={styles.appbar}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("home.openControlCenter.a11y")}
+                hitSlop={8}
+                style={({ pressed }) => [
+                    styles.menuButton,
+                    {
+                        backgroundColor: Color(colors.card).alpha(0.94).toString(),
+                        borderColor: Color(colors.primary).alpha(0.22).toString(),
+                    },
+                    pressed ? styles.pressed : null,
+                ]}
+                onPress={() => navigation.openDrawer()}>
+                <Icon name="bars-3" size={rpx(38)} color={colors.primary} />
+            </Pressable>
             <Pressable
                 accessibilityRole="search"
                 accessibilityLabel={t("home.clickToSearch")}
@@ -45,21 +59,6 @@ export default function NavBar() {
                     {t("home.searchPlaceholder")}
                 </ThemeText>
             </Pressable>
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("home.openControlCenter.a11y")}
-                hitSlop={6}
-                style={({ pressed }) => [
-                    styles.logoButton,
-                    {
-                        backgroundColor: Color(colors.card).alpha(0.94).toString(),
-                        borderColor: Color(colors.primary).alpha(0.22).toString(),
-                    },
-                    pressed ? styles.pressed : null,
-                ]}
-                onPress={() => navigation.openDrawer()}>
-                <Image source={ImgAsset.logo} style={styles.logo} />
-            </Pressable>
         </Animated.View>
     );
 }
@@ -74,6 +73,15 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
+    menuButton: {
+        width: rpx(76),
+        height: rpx(76),
+        marginRight: rpx(18),
+        borderRadius: rpx(38),
+        borderWidth: StyleSheet.hairlineWidth,
+        alignItems: "center",
+        justifyContent: "center",
+    },
     search: {
         flex: 1,
         height: rpx(84),
@@ -86,21 +94,6 @@ const styles = StyleSheet.create({
     searchText: {
         flex: 1,
         marginLeft: rpx(16),
-    },
-    logoButton: {
-        width: rpx(76),
-        height: rpx(76),
-        marginLeft: rpx(18),
-        borderRadius: rpx(38),
-        borderWidth: StyleSheet.hairlineWidth,
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-    },
-    logo: {
-        width: rpx(64),
-        height: rpx(64),
-        borderRadius: rpx(22),
     },
     pressed: {
         opacity: 0.68,

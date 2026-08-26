@@ -123,8 +123,26 @@ export default function MusicItemOptions(props: IMusicItemOptionsProps) {
             description: localPath ?? undefined,
             show: !!localPath,
             onPress: () => {
-                Clipboard.setString(localPath!);
-                Toast.success(t("toast.copiedToClipboard"));
+                if (!localPath) {
+                    return;
+                }
+                showDialog("SimpleDialog", {
+                    title: t("panel.musicItemOptions.localPath"),
+                    content: (
+                        <ThemeText selectable style={style.localPathText}>
+                            {localPath}
+                        </ThemeText>
+                    ),
+                    okText: t("common.copy"),
+                    onOk() {
+                        try {
+                            Clipboard.setString(localPath);
+                            Toast.success(t("toast.copiedToClipboard"));
+                        } catch {
+                            Toast.warn(t("toast.copiedToClipboardFailed"));
+                        }
+                    },
+                });
             },
         },
         {
@@ -353,6 +371,10 @@ const style = StyleSheet.create({
     },
     title: {
         paddingRight: rpx(24),
+    },
+    localPathText: {
+        lineHeight: rpx(40),
+        flexShrink: 1,
     },
     footer: {
         width: rpx(750),

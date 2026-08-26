@@ -137,6 +137,19 @@ export default function HomeDrawer(props: any) {
                             borderColor: Color(colors.primary).alpha(0.18).toString(),
                         },
                     ]}>
+                    <Image
+                        accessible={false}
+                        source={ImgAsset.logo}
+                        style={styles.logo}
+                    />
+                    <View style={styles.brandCopy}>
+                        <ThemeText fontSize="title" fontWeight="bold">
+                            {DeviceInfo.getApplicationName()}
+                        </ThemeText>
+                        <ThemeText fontColor="textSecondary" fontSize="description">
+                            {t("home.brandTagline")}
+                        </ThemeText>
+                    </View>
                     <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={t("sidebar.basicSettings")}
@@ -148,15 +161,6 @@ export default function HomeDrawer(props: any) {
                         ]}>
                         <Icon name="cog-8-tooth" size={rpx(32)} color={colors.primary} />
                     </Pressable>
-                    <Image source={ImgAsset.logo} style={styles.logo} />
-                    <View style={styles.brandCopy}>
-                        <ThemeText fontSize="title" fontWeight="bold">
-                            {DeviceInfo.getApplicationName()}
-                        </ThemeText>
-                        <ThemeText fontColor="textSecondary" fontSize="description">
-                            {t("home.brandTagline")}
-                        </ThemeText>
-                    </View>
                 </Animated.View>
 
                 <DrawerSection delay={70} title={t("sidebar.controlCenter")} items={libraryItems} />
@@ -169,7 +173,7 @@ export default function HomeDrawer(props: any) {
                 style={[
                     styles.exitRow,
                     {
-                        backgroundColor: Color(colors.card).alpha(0.94).toString(),
+                        backgroundColor: colors.card,
                         borderColor: Color(colors.text).alpha(0.08).toString(),
                     },
                 ]}>
@@ -265,12 +269,13 @@ const styles = StyleSheet.create({
     screen: { flex: 1 },
     scroll: { flex: 1 },
     scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: rpx(22),
-        paddingTop: rpx(12),
-        paddingBottom: rpx(12),
+        paddingTop: rpx(42),
+        paddingBottom: rpx(28),
     },
     brandCard: {
-        minHeight: rpx(116),
+        minHeight: rpx(128),
         paddingHorizontal: rpx(18),
         borderRadius: rpx(28),
         borderWidth: StyleSheet.hairlineWidth,
@@ -291,12 +296,12 @@ const styles = StyleSheet.create({
         width: rpx(56),
         height: rpx(56),
         borderRadius: rpx(20),
-        marginRight: rpx(14),
+        marginLeft: rpx(14),
         alignItems: "center",
         justifyContent: "center",
     },
     section: {
-        marginTop: rpx(18),
+        marginTop: rpx(22),
         paddingVertical: rpx(10),
         borderRadius: rpx(28),
         borderWidth: StyleSheet.hairlineWidth,
@@ -315,9 +320,9 @@ const styles = StyleSheet.create({
         marginRight: rpx(18),
     },
     exitRow: {
-        minHeight: rpx(84),
+        minHeight: rpx(92),
         paddingHorizontal: rpx(22),
-        paddingVertical: rpx(6),
+        paddingVertical: rpx(10),
         borderTopWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
         alignItems: "center",
