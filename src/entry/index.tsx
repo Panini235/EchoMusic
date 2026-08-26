@@ -17,6 +17,7 @@ import { StatusBar } from "react-native";
 import { ReduceMotion, ReducedMotionConfig } from "react-native-reanimated";
 import { routes } from "@/core/router/routes.tsx";
 import ErrorBoundary from "@/components/errorBoundary";
+import { ROUTE_PATH } from "@/core/router";
 
 /**
  * 字体颜色
@@ -28,6 +29,15 @@ StatusBar.setTranslucent(true);
 bootstrap();
 const Stack = createNativeStackNavigator<any>();
 
+const linking = {
+    prefixes: ["echomusic://app", "musicfree://app"],
+    config: {
+        screens: {
+            [ROUTE_PATH.SEARCH_PAGE]: "search",
+        },
+    },
+};
+
 export default function Pages() {
     const theme = Theme.useTheme();
 
@@ -36,7 +46,7 @@ export default function Pages() {
             <ReducedMotionConfig mode={ReduceMotion.System} />
             <GestureHandlerRootView style={globalStyle.flex1}>
                 <SafeAreaProvider>
-                    <NavigationContainer theme={theme}>
+                    <NavigationContainer theme={theme} linking={linking}>
                         <PageBackground />
                         <Stack.Navigator
                             initialRouteName={routes[0].path}

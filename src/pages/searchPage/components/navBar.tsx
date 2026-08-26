@@ -8,7 +8,7 @@ import { useI18N } from "@/core/i18n";
 import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
 import Color from "color";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { addHistory } from "../common/historySearch";
@@ -19,15 +19,30 @@ import {
     pageStatusAtom,
     queryAtom,
     searchResultsAtom,
+    selectedSearchPluginHashesAtom,
 } from "../store/atoms";
+import PluginManager from "@/core/pluginManager";
+import { showPanel } from "@/components/panels/usePanel";
 
 export default function NavBar() {
     const search = useSearch();
     const [query, setQuery] = useAtom(queryAtom);
+    const selectedPluginHashes = useAtomValue(
+        selectedSearchPluginHashesAtom,
+    );
     const setPageStatus = useSetAtom(pageStatusAtom);
     const colors = useColors();
     const setSearchResultsState = useSetAtom(searchResultsAtom);
     const { t } = useI18N();
+    const searchablePlugins = PluginManager.getSortedSearchablePlugins();
+    const selectedCount = selectedPluginHashes
+        ? searchablePlugins.filter(plugin =>
+            selectedPluginHashes.includes(plugin.hash),
+        ).length
+        : searchablePlugins.length;
+    const sourceSelection = selectedPluginHashes
+        ? t("searchPage.selectedSourcesCount", { count: selectedCount })
+        : t("searchPage.allSources");
 
     const onSearchSubmit = async () => {
         if (query === "") {
@@ -37,14 +52,31 @@ export default function NavBar() {
         setPageStatus(prev =>
             prev === PageStatus.EDITING ? PageStatus.SEARCHING : prev,
         );
-        await search(query, 1);
+        await search(
+            query,
+            1,
+            undefined,
+            undefined,
+            selectedPluginHashes ?? undefined,
+        );
         await addHistory(query);
     };
 
     const hintTextColor = Color(colors.text).alpha(0.6).toString();
 
     return (
-        <AppBar containerStyle={style.appbar} contentStyle={style.appbar}>
+        <AppBar
+            containerStyle={style.appbar}
+            contentStyle={style.appbar}
+            menu={[
+                {
+                    icon: "musical-note",
+                    title: t("searchPage.searchSourcesMenu", {
+                        selection: sourceSelection,
+                    }),
+                    onPress: () => showPanel("SearchSources"),
+                },
+            ]}>
             <View style={style.searchBarContainer}>
                 <Icon
                     name="magnifying-glass"

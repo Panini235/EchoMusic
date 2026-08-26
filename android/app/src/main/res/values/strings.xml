@@ -6,4 +6,6 @@
     <!-- rtnp channel name -->
     <string name="rntp_temporary_channel_name">畅听音乐播放</string>
     <string name="playback_channel_name">畅听音乐播放</string>
+    <string name="shortcut_search_short_label">搜索</string>
+    <string name="shortcut_search_long_label">搜索音乐</string>
 </resources>

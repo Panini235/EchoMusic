@@ -11,13 +11,13 @@
 
 - [Blocked] No rendered Android implementation was available for visual comparison.
   - Evidence: the source visual was opened and inspected, but this workspace has no connected Android device, Android virtual device, or iOS simulator from which to capture the React Native screen.
-  - Impact: typography, exact spacing, artwork crop, bottom-dock fit, and compact-device overflow cannot be certified from source code alone.
+  - Impact: typography, exact spacing, artwork crop, mini-player fit, and compact-device overflow cannot be certified from source code alone.
   - Required fix: install the GitHub Actions APK on an Android device, capture the home screen at the same dark-state viewport, and compare it with the source in one combined image.
 
 ## Required fidelity surfaces
 
 - Fonts and typography: code uses the existing EchoMusic text scale and weights; rendered wrapping and optical weight remain unverified.
-- Spacing and layout rhythm: the selected hierarchy is implemented (search pill, immersive hero, recent playback, playlists, mini-player, bottom dock); exact rendered rhythm remains unverified.
+- Spacing and layout rhythm: the selected hierarchy is implemented (search pill, immersive hero, recent playback, playlists, mini-player); exact rendered rhythm remains unverified.
 - Colors and visual tokens: near-black surfaces and warm coral/amber accents map to the selected direction; device rendering remains unverified.
 - Image quality and asset fidelity: user artwork and the existing EchoMusic raster logo are used; crop and fallback behavior remain unverified on device.
 - Copy and content: Simplified Chinese, Traditional Chinese, and English keys have parity and parse successfully.
@@ -28,7 +28,7 @@ Blocked: no implementation screenshot is available.
 
 ## Focused region comparison evidence
 
-Blocked: no implementation screenshot is available. The key regions to capture are the search/control-center header, continue-listening card, recent-play carousel, bottom player/dock stack, right drawer, and startup transition.
+Blocked: no implementation screenshot is available. The key regions to capture are the search/control-center header, continue-listening card, recent-play carousel, bottom player area, right drawer, and startup transition.
 
 ## Comparison history
 

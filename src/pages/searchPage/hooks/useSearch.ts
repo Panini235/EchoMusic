@@ -17,7 +17,8 @@ export default function useSearch() {
      * query: 搜索词
      * queryPage: 搜索页码
      * type: 搜索类型
-     * pluginHash: 搜索条件
+     * pluginHash: 结果页单个音源的分页/重试条件
+     * selectedPluginHashes: 新搜索选择的音源集合
      */
     const search = useCallback(
         async function (
@@ -25,15 +26,20 @@ export default function useSearch() {
             queryPage?: number,
             type?: ICommon.SupportMediaType,
             pluginHash?: string,
+            selectedPluginHashes?: string[],
         ) {
-            /** 如果没有指定插件，就用所有插件搜索 */
-
             let plugins: Plugin[] = [];
             if (pluginHash) {
                 const tgtPlugin = PluginManager.getByHash(pluginHash);
                 tgtPlugin && (plugins = [tgtPlugin]);
             } else {
                 plugins = PluginManager.getSearchablePlugins();
+                if (selectedPluginHashes) {
+                    const selectedHashes = new Set(selectedPluginHashes);
+                    plugins = plugins.filter(plugin =>
+                        selectedHashes.has(plugin.hash),
+                    );
+                }
             }
             if (plugins.length === 0) {
                 setPageStatus(PageStatus.NO_PLUGIN);

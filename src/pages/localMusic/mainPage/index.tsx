@@ -54,9 +54,31 @@ export default function MainPage() {
                         icon: "magnifying-glass",
                         title: t("localMusic.scanLocalMusic"),
                         async onPress() {
-                            const canReadAudio = await NativeUtils.requestAudioReadPermission();
+                            const canReadAudio =
+                                await NativeUtils.requestAudioReadPermission();
                             if (!canReadAudio) {
-                                Toast.warn(t("localMusic.audioReadPermissionDenied"));
+                                Toast.warn(
+                                    t("localMusic.audioReadPermissionDenied"),
+                                );
+                                return;
+                            }
+                            const canBrowseFolders =
+                                await NativeUtils.checkStoragePermission();
+                            if (!canBrowseFolders) {
+                                showDialog("SimpleDialog", {
+                                    title: t(
+                                        "localMusic.directoryAccessRequiredTitle",
+                                    ),
+                                    content: t(
+                                        "localMusic.directoryAccessRequired",
+                                    ),
+                                    okText: t(
+                                        "localMusic.openPermissionSettings",
+                                    ),
+                                    onOk() {
+                                        NativeUtils.requestStoragePermission();
+                                    },
+                                });
                                 return;
                             }
                             navigate(ROUTE_PATH.FILE_SELECTOR, {

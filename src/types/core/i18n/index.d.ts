@@ -97,9 +97,7 @@ export interface ILanguageData {
     "home.viewAllHistory": string;
     "home.frequentPlaylists": string;
     "home.quickAccess": string;
-    "home.home": string;
     "home.library": string;
-    "home.discover": string;
     "home.player": string;
     "home.profile": string;
     "startup.preparing": string;
@@ -131,6 +129,9 @@ export interface ILanguageData {
     "localMusic.sortMusic": string; // 本地音乐排序
     "localMusic.noMediaFound": string; // 未发现可导入音频
     "localMusic.audioReadPermissionDenied": string; // 音频读取权限不足
+    "localMusic.directoryAccessRequiredTitle": string; // 目录访问权限标题
+    "localMusic.directoryAccessRequired": string; // 目录访问权限说明
+    "localMusic.openPermissionSettings": string; // 前往权限设置
     "sheetDetail.downloadAllToConfiguredFolder": string; // 下载全部到设置目录
     "panel.musicItemOptions.localPath": string; // 本地文件路径
     "panel.musicItemOptions.switchSource": string; // 更换音源
@@ -175,6 +176,13 @@ export interface ILanguageData {
     // 搜索页面相关
     "searchPage.searchPlaceHolder": string; // 搜索
     "searchPage.searchLabel.a11y": string; // 搜索标签
+    "searchPage.searchSourcesMenu": string; // 搜索音源菜单
+    "searchPage.selectSources": string; // 选择搜索音源
+    "searchPage.allSources": string; // 全部音源
+    "searchPage.allSourcesDescription": string; // 全部音源说明
+    "searchPage.selectedSourcesCount": string; // 已选音源数量
+    "searchPage.sourceDescription": string; // 音源平台说明
+    "searchPage.selectAtLeastOneSource": string; // 至少选择一个音源
     "searchPage.history": string; // 历史记录
     "searchPage.artistResultWorksNum": string; // 艺术家作品数量
     "searchPage.comingSoon": string; // 敬请期待

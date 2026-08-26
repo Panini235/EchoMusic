@@ -3,8 +3,9 @@ import {
     internalSerializeKey,
     supportLocalMediaType,
 } from "@/constants/commonConst";
-import mp3Util, { IBasicMeta, ILocalMediaFile } from "@/native/mp3Util";
+import mp3Util, { IBasicMeta } from "@/native/mp3Util";
 import { addFileScheme, getFileName } from "@/utils/fileUtils.ts";
+import { trace } from "@/utils/log";
 import { getLocalPath, isSameMediaItem } from "@/utils/mediaUtils";
 import StateMapper from "@/utils/stateMapper";
 import { getStorage, setStorage } from "@/utils/storage";
@@ -214,6 +215,7 @@ async function getMusicStats(inputFolderPaths: string[]) {
         ).values(),
     ];
     const folderQueue = [...selectedFolders];
+    trace("本地音乐扫描开始", { selectedFolders });
     const visitedFolders = new Set<string>();
     const unreadableFolders = new Map<string, string>();
     const bySourcePath = new Map<string, DiscoveredMedia>();
@@ -258,27 +260,20 @@ async function getMusicStats(inputFolderPaths: string[]) {
         });
     }
 
-    const fallbackFolders =
-        unreadableFolders.size > 0
-            ? [...unreadableFolders.values()]
-            : byUri.size === 0
-                ? selectedFolders
-                : [];
-    if (fallbackFolders.length > 0) {
-        let mediaStoreFiles: ILocalMediaFile[];
-        try {
-            mediaStoreFiles = await mp3Util.findAudioInFolders(
-                fallbackFolders,
-                supportLocalMediaType,
-            );
-        } catch (error) {
-            const code = nativeErrorCode(error);
-            throw new Error(
-                code.includes("MEDIA_STORE_PERMISSION_DENIED")
-                    ? "LOCAL_MEDIA_ACCESS_DENIED"
-                    : "LOCAL_MEDIA_SCAN_FAILED",
-            );
-        }
+    const rnfsMediaCount = byUri.size;
+    trace("本地音乐 RNFS 扫描完成", {
+        visitedFolderCount: visitedFolders.size,
+        unreadableFolders: [...unreadableFolders.values()],
+        mediaCount: rnfsMediaCount,
+    });
+
+    // MediaStore is not only an error fallback. RNFS can return a partial tree
+    // under scoped storage without throwing, so always merge both discoveries.
+    try {
+        const mediaStoreFiles = await mp3Util.findAudioInFolders(
+            selectedFolders,
+            supportLocalMediaType,
+        );
         mediaStoreFiles.forEach(media => {
             if (
                 media?.uri?.toLowerCase().startsWith("content://") &&
@@ -287,6 +282,27 @@ async function getMusicStats(inputFolderPaths: string[]) {
                 addDiscoveredMedia(media, bySourcePath, byUri);
             }
         });
+        trace("本地音乐 MediaStore 扫描完成", {
+            mediaStoreCount: mediaStoreFiles.length,
+            mergedMediaCount: byUri.size,
+        });
+    } catch (error) {
+        trace(
+            "本地音乐 MediaStore 扫描失败",
+            {
+                code: nativeErrorCode(error),
+                rnfsMediaCount,
+            },
+            "error",
+        );
+        if (rnfsMediaCount === 0) {
+            const code = nativeErrorCode(error);
+            throw new Error(
+                code.includes("MEDIA_STORE_PERMISSION_DENIED")
+                    ? "LOCAL_MEDIA_ACCESS_DENIED"
+                    : "LOCAL_MEDIA_SCAN_FAILED",
+            );
+        }
     }
 
     return { musicList: [...byUri.values()], token: _importToken };
