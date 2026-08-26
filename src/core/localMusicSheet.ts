@@ -4,7 +4,7 @@ import {
     supportLocalMediaType,
 } from "@/constants/commonConst";
 import mp3Util, { IBasicMeta, ILocalMediaFile } from "@/native/mp3Util";
-import { getFileName } from "@/utils/fileUtils.ts";
+import { addFileScheme, getFileName } from "@/utils/fileUtils.ts";
 import { getLocalPath, isSameMediaItem } from "@/utils/mediaUtils";
 import StateMapper from "@/utils/stateMapper";
 import { getStorage, setStorage } from "@/utils/storage";
@@ -298,7 +298,10 @@ function cancelImportLocal() {
 
 // 导入本地音乐
 const groupNum = 25;
-async function importLocal(folderPaths: string[]) {
+async function importLocal(inputFolderPaths: string[]) {
+    // Keep the upstream RNFS contract: Android directory walks begin with file://
+    // URIs. MediaStore fallback normalizes those URIs back to filesystem paths.
+    const folderPaths = inputFolderPaths.map(addFileScheme);
     const { musicList, token } = await getMusicStats(folderPaths);
     if (token !== importToken) {
         throw new Error("Import Broken");
