@@ -20,6 +20,7 @@ export default function NavBar() {
             entering={FadeInDown.duration(360)}
             style={styles.appbar}>
             <Pressable
+                testID="home-menu"
                 accessibilityRole="button"
                 accessibilityLabel={t("home.openControlCenter.a11y")}
                 hitSlop={8}
@@ -35,6 +36,7 @@ export default function NavBar() {
                 <Icon name="bars-3" size={rpx(38)} color={colors.primary} />
             </Pressable>
             <Pressable
+                testID="home-search"
                 accessibilityRole="search"
                 accessibilityLabel={t("home.clickToSearch")}
                 style={({ pressed }) => [

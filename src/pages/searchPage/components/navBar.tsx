@@ -85,6 +85,7 @@ export default function NavBar() {
                     style={style.magnify}
                 />
                 <Input
+                    testID="search-input"
                     autoFocus
                     style={[
                         style.searchBar,

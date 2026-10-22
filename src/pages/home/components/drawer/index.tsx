@@ -151,6 +151,7 @@ export default function HomeDrawer(props: any) {
                         </ThemeText>
                     </View>
                     <Pressable
+                        testID="drawer-settings"
                         accessibilityRole="button"
                         accessibilityLabel={t("sidebar.basicSettings")}
                         hitSlop={8}

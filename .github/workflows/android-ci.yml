@@ -59,11 +59,39 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run unit tests
-        run: npm test -- --runInBand --ci
+        run: |
+          npm test -- --runInBand --ci
+          node --test .github/qa/ui-dump.test.mjs .github/qa/android-smoke.test.mjs
 
       - name: Build standalone Android APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Enable Android emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Check Release APK interactions on Android 15
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          ram-size: 2048M
+          disable-animations: false
+          emulator-boot-timeout: 300
+          script: node .github/qa/android-smoke.mjs android/app/build/outputs/apk/release/app-universal-release.apk
+
+      - name: Upload Android interaction evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-35-interaction-evidence
+          path: artifacts/android-smoke/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Prepare install package
         id: package
@@ -127,7 +155,7 @@ jobs:
         run: |
           echo "### EchoMusic Android CI" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`${GITHUB_SHA::7}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Type check, tests and a standalone Android build run in one clean Ubuntu job." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Type check, regression tests, standalone APK build and Android 15 interaction checks run in one clean Ubuntu job." >> "$GITHUB_STEP_SUMMARY"
           if [[ "${GITHUB_REF_TYPE}" == "tag" || "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
             echo "- Direct APK: GitHub Release \`${PUBLISHED_TAG}\` (no ZIP wrapper)." >> "$GITHUB_STEP_SUMMARY"
           else
