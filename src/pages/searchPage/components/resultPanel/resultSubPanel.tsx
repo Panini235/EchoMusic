@@ -8,7 +8,10 @@ import { useAtomValue } from "jotai";
 import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Text } from "react-native";
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
-import { searchResultsAtom } from "../../store/atoms";
+import {
+    searchResultsAtom,
+    selectedSearchPluginHashesAtom,
+} from "../../store/atoms";
 import { renderMap } from "./results";
 import DefaultResults from "./results/defaultResults";
 import ResultWrapper from "./resultWrapper";
@@ -66,16 +69,26 @@ function ResultSubPanel(props: IResultSubPanelProps) {
     const [index, setIndex] = useState(0);
     const colors = useColors();
     const { t } = useI18N();
-
-    const routes = PluginManager.getSortedSearchablePlugins(props.tab).map(
-        _ => ({
-            key: _.hash,
-            title: _.name,
-        }),
+    const selectedPluginHashes = useAtomValue(
+        selectedSearchPluginHashesAtom,
     );
+
+    const routes = useMemo(() => {
+        const selectedHashes = selectedPluginHashes
+            ? new Set(selectedPluginHashes)
+            : null;
+        return PluginManager.getSortedSearchablePlugins(props.tab)
+            .filter(plugin =>
+                selectedHashes ? selectedHashes.has(plugin.hash) : true,
+            )
+            .map(plugin => ({
+                key: plugin.hash,
+                title: plugin.name,
+            }));
+    }, [props.tab, selectedPluginHashes]);
     const renderScene = useMemo(
         () => getSubRouterScene(props.tab, routes),
-        [props.tab],
+        [props.tab, routes],
     );
 
     if (!routes.length) {

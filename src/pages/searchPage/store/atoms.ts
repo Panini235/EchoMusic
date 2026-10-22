@@ -3,7 +3,7 @@ import { atom } from "jotai";
 
 /** 搜索状态 */
 
-export interface ISearchResult<T extends ICommon.SupportMediaType> {
+export interface ISearchResult<T extends ICommon.SupportMediaType = ICommon.SupportMediaType> {
     /** 当前页码 */
     page?: number;
     /** 搜索词 */
@@ -48,4 +48,12 @@ const pageStatusAtom = atom<PageStatus>(PageStatus.EDITING);
 
 const queryAtom = atom<string>("");
 
-export { pageStatusAtom, searchResultsAtom, queryAtom };
+/** null 表示搜索全部可用音源，否则仅搜索指定插件。 */
+const selectedSearchPluginHashesAtom = atom<string[] | null>(null);
+
+export {
+    pageStatusAtom,
+    searchResultsAtom,
+    queryAtom,
+    selectedSearchPluginHashesAtom,
+};

@@ -20,36 +20,43 @@ export default function SeekBar() {
     const progress = useProgress(1000);
     const [tmpProgress, setTmpProgress] = useState<number | null>(null);
     const slidingRef = useRef(false);
+    const duration = Number.isFinite(progress.duration)
+        ? Math.max(0, progress.duration)
+        : 0;
+    const position = Number.isFinite(progress.position)
+        ? Math.max(0, Math.min(duration, progress.position))
+        : 0;
 
     return (
         <View style={style.wrapper}>
-            <TimeLabel time={tmpProgress ?? progress.position} />
+            <TimeLabel time={tmpProgress ?? position} />
             <Slider
                 style={style.slider}
                 minimumTrackTintColor={"#FFFFFF"}
                 maximumTrackTintColor={"rgba(255,255,255,0.24)"}
                 thumbTintColor={"#FFFFFF"}
                 minimumValue={0}
-                maximumValue={progress.duration}
+                maximumValue={duration}
+                disabled={duration <= 0}
                 onSlidingStart={() => {
                     slidingRef.current = true;
                 }}
                 onValueChange={val => {
-                    if (slidingRef.current) {
-                        setTmpProgress(val);
+                    if (slidingRef.current && Number.isFinite(val)) {
+                        setTmpProgress(Math.max(0, Math.min(duration, val)));
                     }
                 }}
                 onSlidingComplete={val => {
                     slidingRef.current = false;
                     setTmpProgress(null);
-                    if (val >= progress.duration - 2) {
-                        val = progress.duration - 2;
+                    if (duration <= 0 || !Number.isFinite(val)) {
+                        return;
                     }
-                    TrackPlayer.seekTo(val);
+                    TrackPlayer.seekTo(Math.max(0, Math.min(duration, val)));
                 }}
-                value={progress.position}
+                value={tmpProgress ?? position}
             />
-            <TimeLabel time={progress.duration} />
+            <TimeLabel time={duration} />
         </View>
     );
 }

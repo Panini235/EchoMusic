@@ -17,7 +17,6 @@ import useOrientation from "@/hooks/useOrientation";
 import { useTheme } from "@react-navigation/native";
 import Color from "color";
 import rpx from "@/utils/rpx";
-import BottomDock from "./components/bottomDock";
 
 function Home() {
     const orientation = useOrientation();
@@ -36,7 +35,6 @@ function Home() {
                 </>
             </HorizontalSafeAreaView>
             <MusicBar />
-            {orientation === "vertical" ? <BottomDock /> : null}
         </SafeAreaView>
     );
 }

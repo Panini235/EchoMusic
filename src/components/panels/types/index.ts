@@ -9,6 +9,7 @@ import CreateMusicSheet from "./createMusicSheet";
 import PlayList from "./playList";
 import PlayRate from "./playRate";
 import SearchLrc from "./searchLrc";
+import SearchSources from "./searchSources";
 import SetFontSize from "./setFontSize";
 import SetLyricOffset from "./setLyricOffset";
 import SetUserVariables from "./setUserVariables";
@@ -48,6 +49,8 @@ export default {
     SheetTags,
     /** 搜索歌词 */
     SearchLrc,
+    /** 搜索音源多选 */
+    SearchSources,
     /** 简单的选择 */
     SimpleSelect,
     /** 颜色选择器 */

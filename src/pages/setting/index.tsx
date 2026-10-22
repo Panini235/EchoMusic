@@ -15,7 +15,7 @@ export default function Setting() {
     const { t } = useI18N();
 
     return (
-        <SafeAreaView edges={["bottom", "top"]} style={style.wrapper}>
+        <SafeAreaView testID="settings-screen" edges={["bottom", "top"]} style={style.wrapper}>
             <StatusBar />
             {settingItem.showNav === false ? null : (
                 <AppBar>{t(settingItem.i18nKey as any)}</AppBar>

@@ -37,19 +37,14 @@ class UtilsModule(context: ReactApplicationContext) : ReactContextBaseJavaModule
 
     @ReactMethod
     fun checkStoragePermission(promise: Promise) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val hasAllFilesAccess = Environment.isExternalStorageManager()
-            val hasAudioReadPermission = ContextCompat.checkSelfPermission(
-                reactContext,
-                Manifest.permission.READ_MEDIA_AUDIO,
-            ) == PackageManager.PERMISSION_GRANTED
-            promise.resolve(hasAllFilesAccess || hasAudioReadPermission)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             promise.resolve(Environment.isExternalStorageManager())
         } else {
-            val readPermission = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-            val writePermission = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-            promise.resolve(readPermission && writePermission)
+            val readPermission = ContextCompat.checkSelfPermission(
+                reactContext,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+            ) == PackageManager.PERMISSION_GRANTED
+            promise.resolve(readPermission)
         }
     }
 
@@ -85,6 +80,7 @@ class UtilsModule(context: ReactApplicationContext) : ReactContextBaseJavaModule
 
     @ReactMethod
     fun requestStoragePermission() {
+        val activity = reactContext.currentActivity ?: return
         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
                 data = Uri.parse("package:${reactContext.packageName}")
@@ -94,7 +90,15 @@ class UtilsModule(context: ReactApplicationContext) : ReactContextBaseJavaModule
                 data = Uri.parse("package:${reactContext.packageName}")
             }
         }
-        reactContext.currentActivity?.startActivity(intent)
+        try {
+            activity.startActivity(intent)
+        } catch (_: Exception) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                activity.startActivity(
+                    Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
+                )
+            }
+        }
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)

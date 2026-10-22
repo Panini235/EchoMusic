@@ -14,15 +14,41 @@ import useColors from "@/hooks/useColors";
 import rpx from "@/utils/rpx";
 import { musicIsPaused } from "@/utils/trackUtils";
 import Color from "color";
-import React, { useMemo } from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import React, { useSyncExternalStore } from "react";
+import { AppState, Image, Pressable, StyleSheet, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useIsFocused } from "@react-navigation/native";
+
+const subscribeToAppState = (listener: () => void) => {
+    const subscription = AppState.addEventListener("change", listener);
+    return () => subscription.remove();
+};
+const isAppActive = () => AppState.currentState === "active";
+
+function LiveProgress() {
+    const { position, duration } = useProgress(1000);
+    const percent = Number.isFinite(position) && Number.isFinite(duration) && duration > 0
+        ? Math.max(0, Math.min(100, position / duration * 100))
+        : 0;
+
+    return <View style={[styles.progressActive, { width: `${percent}%` }]} />;
+}
+
+function ListeningProgress({ active }: { active: boolean }) {
+    const focused = useIsFocused();
+    const foreground = useSyncExternalStore(subscribeToAppState, isAppActive);
+
+    return (
+        <View pointerEvents="none" style={styles.progressTrack}>
+            {active && focused && foreground ? <LiveProgress /> : null}
+        </View>
+    );
+}
 
 export default function ContinueListening() {
     const currentMusic = useCurrentMusic();
     const history = useMusicHistory();
-    const progress = useProgress(1000);
     const musicState = useMusicState();
     const navigate = useNavigate();
     const colors = useColors();
@@ -31,12 +57,6 @@ export default function ContinueListening() {
     const musicItem = currentMusic ?? history[0] ?? null;
     const isCurrent = !!musicItem && TrackPlayer.isCurrentMusic(musicItem);
     const paused = !isCurrent || musicIsPaused(musicState);
-    const progressPercent = useMemo(() => {
-        if (!isCurrent || !progress.duration) {
-            return 0;
-        }
-        return Math.max(0, Math.min(100, progress.position / progress.duration * 100));
-    }, [isCurrent, progress.duration, progress.position]);
 
     const openTarget = () => {
         if (musicItem) {
@@ -131,14 +151,7 @@ export default function ContinueListening() {
             </Pressable>
 
             <View style={styles.footer}>
-                <View style={styles.progressTrack}>
-                    <View
-                        style={[
-                            styles.progressActive,
-                            { width: `${progressPercent}%` },
-                        ]}
-                    />
-                </View>
+                <ListeningProgress active={isCurrent} />
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={paused ? t("common.play") : t("common.pause")}
