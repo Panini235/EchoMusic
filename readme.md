@@ -81,8 +81,11 @@ EchoMusic 只是播放器框架，**不会内置 Bilibili、抖音、网易云�
 
 仓库的 Android 构建全部由
 [`.github/workflows/android-ci.yml`](./.github/workflows/android-ci.yml) 完成。Workflow
-会在干净的 Ubuntu 环境中依次安装依赖、执行 TypeScript 检查和测试、构建
-Release APK，并上传可独立安装的产物。
+会在干净的 Ubuntu 环境中依次安装依赖、执行 TypeScript 检查和回归测试、构建
+Release APK，再将该 APK 安装到 Android 15 模拟器上检查原生交互。冷启动、后台
+恢复、关闭系统动画后的搜索输入、菜单和设置跳转均通过后，才上传可独立安装的产物。
+交互检查截图与诊断日志保存在 Actions 的 `android-35-interaction-evidence` 中；
+安装包仍通过 Release 直接提供 APK。云端模拟器数据不能替代真实手机的帧率、发热或耗电测量。
 
 | 触发方式 | 行为 |
 | --- | --- |
@@ -113,10 +116,12 @@ ZIP 产物。
 ```bash
 npm install --no-audit --no-fund
 npx tsc --noEmit
-npm test -- --runInBand --passWithNoTests
+npm test -- --runInBand --ci
+node --test .github/qa/ui-dump.test.mjs .github/qa/android-smoke.test.mjs
 ```
 
 正式 APK 请通过仓库的 GitHub Workflow 构建，以保持构建环境和产物一致。
+质量验收范围、已取得的证据和待验证项目见 [QUALITY.md](./QUALITY.md)。
 
 ## 打包与二次分发
 
