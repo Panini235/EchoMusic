@@ -1,10 +1,14 @@
-{"version":"1.0.0","changeLog":[
-  "【首发】EchoMusic · 畅听第一个正式版本",
-  "【界面】重构首页、播放器、侧边栏与浮层视觉",
-  "【交互】扩大播放页触摸区域，修复部分按钮偶发无法点击",
-  "【功能】播放队列支持拖拽排序",
-  "【体验】启动时不再主动申请文件权限"
-],"download":[
-  "https://github.com/Panini235/EchoMusic/releases/download/v1.0.0/EchoMusic-v1.0.0-universal.apk",
-  "https://github.com/Panini235/EchoMusic/releases/tag/v1.0.0"
-]}
+{
+  "version": "1.1.4",
+  "changeLog": [
+    "【搜索】隔离旧请求，修复翻页和重试，慢音源不再拖住其他结果",
+    "【播放】修复进度拖动回弹、短音频负数跳转和未知时长拖动",
+    "【性能】缩小首页进度刷新范围，离开首页或切入后台时取消该界面订阅",
+    "【保留】包含上一测试版的本地音乐扫描、音源选择及启动交互改进",
+    "【验收】GitHub Workflow 完成回归检查、APK 编译和 Android 15 三场景点击验证"
+  ],
+  "download": [
+    "https://github.com/Panini235/EchoMusic/releases/download/v1.1.4/EchoMusic-v1.1.4-universal.apk",
+    "https://github.com/Panini235/EchoMusic/releases/tag/v1.1.4"
+  ]
+}
