@@ -65,7 +65,7 @@ function ResultWrapper(props: IResultWrapperProps) {
                 search(query, 1, tab, pluginHash);
             }} />}
             ListFooterComponent={data?.length ? <ListFooter state={searchState} onRetry={() => {
-                search(query, undefined, tab, pluginHash);
+                search(undefined, undefined, tab, pluginHash);
             }} /> : null}
             data={data}
             refreshing={false}

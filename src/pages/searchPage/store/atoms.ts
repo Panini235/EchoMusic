@@ -3,7 +3,7 @@ import { atom } from "jotai";
 
 /** 搜索状态 */
 
-export interface ISearchResult<T extends ICommon.SupportMediaType> {
+export interface ISearchResult<T extends ICommon.SupportMediaType = ICommon.SupportMediaType> {
     /** 当前页码 */
     page?: number;
     /** 搜索词 */

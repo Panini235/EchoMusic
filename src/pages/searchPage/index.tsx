@@ -27,10 +27,12 @@ export default function () {
     useEffect(() => {
         setSearchResultsState(initSearchResults);
         return () => {
+            // Invalidate pending plugin requests when leaving this search page.
+            setSearchResultsState(initSearchResults);
             setPageStatus(PageStatus.EDITING);
             setQuery("");
         };
-    }, []);
+    }, [setPageStatus, setQuery, setSearchResultsState]);
 
     return (
         <SafeAreaView edges={["bottom", "top"]} style={style.wrapper}>

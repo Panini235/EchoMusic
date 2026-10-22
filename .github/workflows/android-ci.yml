@@ -59,7 +59,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run unit tests
-        run: npm test -- --runInBand --passWithNoTests
+        run: npm test -- --runInBand --ci
 
       - name: Build standalone Android APK
         working-directory: android
